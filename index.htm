@@ -932,7 +932,7 @@
             text-align: center;
             cursor: pointer;
             transition: all 0.2s ease;
-            min-height: 50px;
+            min-height: 70px;
             display: flex;
             flex-direction: column;
             align-items: center;
@@ -957,7 +957,7 @@
 
         .member-doc-item .doc-upload-area .doc-preview {
             max-width: 100%;
-            max-height: 50px;
+            max-height: 60px;
             border-radius: 4px;
         }
 
@@ -985,6 +985,51 @@
 
         .member-doc-item input[type="file"] {
             display: none;
+        }
+
+        .photo-actions-compact {
+            display: flex;
+            gap: 6px;
+            margin-top: 6px;
+            flex-wrap: wrap;
+            justify-content: center;
+            width: 100%;
+        }
+
+        .photo-actions-compact button {
+            padding: 6px 12px;
+            border: none;
+            border-radius: 8px;
+            font-weight: 700;
+            cursor: pointer;
+            font-size: 11px;
+            transition: all 0.3s ease;
+            flex: 1;
+            min-width: 60px;
+        }
+
+        .photo-actions-compact .btn-camera {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            box-shadow: 0 2px 10px rgba(102, 126, 234, 0.2);
+        }
+
+        .photo-actions-compact .btn-gallery {
+            background: linear-gradient(135deg, #48bb78 0%, #38a169 100%);
+            color: white;
+            box-shadow: 0 2px 10px rgba(72, 187, 120, 0.2);
+        }
+
+        .photo-actions-compact button:hover {
+            transform: scale(1.05);
+        }
+
+        .photo-actions-compact button:active {
+            transform: scale(0.95);
+        }
+
+        .camera-input {
+            display: none !important;
         }
 
         .save-member-btn {
@@ -1079,6 +1124,17 @@
             margin-right: 6px;
         }
 
+        /* Cropper Styles */
+        .crop-handle {
+            position: absolute;
+            width: 16px;
+            height: 16px;
+            background: #48bb78;
+            border: 2px solid white;
+            border-radius: 50%;
+            box-shadow: 0 0 15px rgba(72,187,120,0.3);
+        }
+
         @media (max-width: 480px) {
             .form-row {
                 grid-template-columns: 1fr;
@@ -1140,6 +1196,12 @@
 
             .search-result-item {
                 padding: 10px 12px;
+            }
+
+            .photo-actions-compact button {
+                font-size: 10px;
+                padding: 5px 8px;
+                min-width: 50px;
             }
         }
 
@@ -1369,14 +1431,14 @@
             <div style="position:relative;overflow:hidden;border-radius:12px;background:rgba(0,0,0,0.3);touch-action:none;user-select:none;-webkit-user-select:none;" id="cropperWrapper">
                 <img id="cropperImage" src="" alt="Crop" style="display:block;width:100%;height:auto;pointer-events:none;">
                 <div id="cropBox" style="position:absolute;border:2px solid #48bb78;box-shadow:0 0 0 9999px rgba(0,0,0,0.6);cursor:move;touch-action:none;user-select:none;-webkit-user-select:none;">
-                    <div class="crop-handle" style="position:absolute;width:16px;height:16px;background:#48bb78;border:2px solid white;border-radius:50%;box-shadow:0 0 15px rgba(72,187,120,0.3);top:-8px;left:-8px;cursor:nw-resize;"></div>
-                    <div class="crop-handle" style="position:absolute;width:16px;height:16px;background:#48bb78;border:2px solid white;border-radius:50%;box-shadow:0 0 15px rgba(72,187,120,0.3);top:-8px;right:-8px;cursor:ne-resize;"></div>
-                    <div class="crop-handle" style="position:absolute;width:16px;height:16px;background:#48bb78;border:2px solid white;border-radius:50%;box-shadow:0 0 15px rgba(72,187,120,0.3);bottom:-8px;left:-8px;cursor:sw-resize;"></div>
-                    <div class="crop-handle" style="position:absolute;width:16px;height:16px;background:#48bb78;border:2px solid white;border-radius:50%;box-shadow:0 0 15px rgba(72,187,120,0.3);bottom:-8px;right:-8px;cursor:se-resize;"></div>
-                    <div class="crop-handle" style="position:absolute;width:16px;height:16px;background:#48bb78;border:2px solid white;border-radius:50%;box-shadow:0 0 15px rgba(72,187,120,0.3);top:-8px;left:50%;transform:translateX(-50%);cursor:n-resize;"></div>
-                    <div class="crop-handle" style="position:absolute;width:16px;height:16px;background:#48bb78;border:2px solid white;border-radius:50%;box-shadow:0 0 15px rgba(72,187,120,0.3);bottom:-8px;left:50%;transform:translateX(-50%);cursor:s-resize;"></div>
-                    <div class="crop-handle" style="position:absolute;width:16px;height:16px;background:#48bb78;border:2px solid white;border-radius:50%;box-shadow:0 0 15px rgba(72,187,120,0.3);top:50%;left:-8px;transform:translateY(-50%);cursor:w-resize;"></div>
-                    <div class="crop-handle" style="position:absolute;width:16px;height:16px;background:#48bb78;border:2px solid white;border-radius:50%;box-shadow:0 0 15px rgba(72,187,120,0.3);top:50%;right:-8px;transform:translateY(-50%);cursor:e-resize;"></div>
+                    <div class="crop-handle" style="top:-8px;left:-8px;cursor:nw-resize;"></div>
+                    <div class="crop-handle" style="top:-8px;right:-8px;cursor:ne-resize;"></div>
+                    <div class="crop-handle" style="bottom:-8px;left:-8px;cursor:sw-resize;"></div>
+                    <div class="crop-handle" style="bottom:-8px;right:-8px;cursor:se-resize;"></div>
+                    <div class="crop-handle" style="top:-8px;left:50%;transform:translateX(-50%);cursor:n-resize;"></div>
+                    <div class="crop-handle" style="bottom:-8px;left:50%;transform:translateX(-50%);cursor:s-resize;"></div>
+                    <div class="crop-handle" style="top:50%;left:-8px;transform:translateY(-50%);cursor:w-resize;"></div>
+                    <div class="crop-handle" style="top:50%;right:-8px;transform:translateY(-50%);cursor:e-resize;"></div>
                 </div>
             </div>
             <div style="color:rgba(255,255,255,0.6);font-size:14px;text-align:center;padding:10px 0;">📐 Drag to adjust crop area</div>
@@ -1819,7 +1881,7 @@
         }
 
         // ============================================
-        // RENDER MEMBER LIST
+        // RENDER MEMBER LIST WITH CAMERA SUPPORT
         // ============================================
         function renderMemberList() {
             const container = document.getElementById('memberList');
@@ -1849,19 +1911,35 @@
                         <div class="member-doc-row">
                             <div class="member-doc-item">
                                 <span class="doc-label">🪪 Aadhar Front</span>
-                                <div class="doc-upload-area ${member.aadharFront ? 'has-doc' : ''}" id="docArea_aadharFront_${memberId}" onclick="document.getElementById('docInput_aadharFront_${memberId}').click()">
-                                    ${member.aadharFront ? `<img class="doc-preview" src="${member.aadharFront}" alt="Aadhar Front">` : `<span class="doc-icon">📷</span><span class="doc-label-text">Tap to upload</span>`}
-                                    <button class="remove-doc-btn" onclick="event.stopPropagation();removeDoc('${memberId}','aadharFront')">✕</button>
-                                    <input type="file" id="docInput_aadharFront_${memberId}" accept="image/*" onchange="handleDocUpload(event,'${memberId}','aadharFront')">
+                                <div class="doc-upload-area ${member.aadharFront ? 'has-doc' : ''}" id="docArea_aadharFront_${memberId}">
+                                    ${member.aadharFront ? 
+                                        `<img class="doc-preview" src="${member.aadharFront}" alt="Aadhar Front">
+                                        <button class="remove-doc-btn" onclick="event.stopPropagation();removeDoc('${memberId}','aadharFront')">✕</button>` : 
+                                        `<span class="doc-icon">📷</span>
+                                        <span class="doc-label-text">Tap to upload</span>
+                                        <div class="photo-actions-compact">
+                                            <button class="btn-camera" onclick="event.stopPropagation();openCamera('${memberId}','aadharFront')">📸 Camera</button>
+                                            <button class="btn-gallery" onclick="event.stopPropagation();document.getElementById('docInput_aadharFront_${memberId}').click()">🖼️ Gallery</button>
+                                        </div>`
+                                    }
+                                    <input type="file" class="camera-input" id="docInput_aadharFront_${memberId}" accept="image/*" capture="environment" onchange="handleDocUpload(event,'${memberId}','aadharFront')">
                                 </div>
                                 <input type="hidden" id="doc_aadharFront_${memberId}" value="${member.aadharFront || ''}">
                             </div>
                             <div class="member-doc-item">
                                 <span class="doc-label">🪪 Aadhar Back</span>
-                                <div class="doc-upload-area ${member.aadharBack ? 'has-doc' : ''}" id="docArea_aadharBack_${memberId}" onclick="document.getElementById('docInput_aadharBack_${memberId}').click()">
-                                    ${member.aadharBack ? `<img class="doc-preview" src="${member.aadharBack}" alt="Aadhar Back">` : `<span class="doc-icon">📷</span><span class="doc-label-text">Tap to upload</span>`}
-                                    <button class="remove-doc-btn" onclick="event.stopPropagation();removeDoc('${memberId}','aadharBack')">✕</button>
-                                    <input type="file" id="docInput_aadharBack_${memberId}" accept="image/*" onchange="handleDocUpload(event,'${memberId}','aadharBack')">
+                                <div class="doc-upload-area ${member.aadharBack ? 'has-doc' : ''}" id="docArea_aadharBack_${memberId}">
+                                    ${member.aadharBack ? 
+                                        `<img class="doc-preview" src="${member.aadharBack}" alt="Aadhar Back">
+                                        <button class="remove-doc-btn" onclick="event.stopPropagation();removeDoc('${memberId}','aadharBack')">✕</button>` : 
+                                        `<span class="doc-icon">📷</span>
+                                        <span class="doc-label-text">Tap to upload</span>
+                                        <div class="photo-actions-compact">
+                                            <button class="btn-camera" onclick="event.stopPropagation();openCamera('${memberId}','aadharBack')">📸 Camera</button>
+                                            <button class="btn-gallery" onclick="event.stopPropagation();document.getElementById('docInput_aadharBack_${memberId}').click()">🖼️ Gallery</button>
+                                        </div>`
+                                    }
+                                    <input type="file" class="camera-input" id="docInput_aadharBack_${memberId}" accept="image/*" capture="environment" onchange="handleDocUpload(event,'${memberId}','aadharBack')">
                                 </div>
                                 <input type="hidden" id="doc_aadharBack_${memberId}" value="${member.aadharBack || ''}">
                             </div>
@@ -1870,19 +1948,35 @@
                         <div class="member-doc-row">
                             <div class="member-doc-item">
                                 <span class="doc-label">🗳️ Voter Front</span>
-                                <div class="doc-upload-area ${member.voterFront ? 'has-doc' : ''}" id="docArea_voterFront_${memberId}" onclick="document.getElementById('docInput_voterFront_${memberId}').click()">
-                                    ${member.voterFront ? `<img class="doc-preview" src="${member.voterFront}" alt="Voter Front">` : `<span class="doc-icon">📷</span><span class="doc-label-text">Tap to upload</span>`}
-                                    <button class="remove-doc-btn" onclick="event.stopPropagation();removeDoc('${memberId}','voterFront')">✕</button>
-                                    <input type="file" id="docInput_voterFront_${memberId}" accept="image/*" onchange="handleDocUpload(event,'${memberId}','voterFront')">
+                                <div class="doc-upload-area ${member.voterFront ? 'has-doc' : ''}" id="docArea_voterFront_${memberId}">
+                                    ${member.voterFront ? 
+                                        `<img class="doc-preview" src="${member.voterFront}" alt="Voter Front">
+                                        <button class="remove-doc-btn" onclick="event.stopPropagation();removeDoc('${memberId}','voterFront')">✕</button>` : 
+                                        `<span class="doc-icon">📷</span>
+                                        <span class="doc-label-text">Tap to upload</span>
+                                        <div class="photo-actions-compact">
+                                            <button class="btn-camera" onclick="event.stopPropagation();openCamera('${memberId}','voterFront')">📸 Camera</button>
+                                            <button class="btn-gallery" onclick="event.stopPropagation();document.getElementById('docInput_voterFront_${memberId}').click()">🖼️ Gallery</button>
+                                        </div>`
+                                    }
+                                    <input type="file" class="camera-input" id="docInput_voterFront_${memberId}" accept="image/*" capture="environment" onchange="handleDocUpload(event,'${memberId}','voterFront')">
                                 </div>
                                 <input type="hidden" id="doc_voterFront_${memberId}" value="${member.voterFront || ''}">
                             </div>
                             <div class="member-doc-item">
                                 <span class="doc-label">🗳️ Voter Back</span>
-                                <div class="doc-upload-area ${member.voterBack ? 'has-doc' : ''}" id="docArea_voterBack_${memberId}" onclick="document.getElementById('docInput_voterBack_${memberId}').click()">
-                                    ${member.voterBack ? `<img class="doc-preview" src="${member.voterBack}" alt="Voter Back">` : `<span class="doc-icon">📷</span><span class="doc-label-text">Tap to upload</span>`}
-                                    <button class="remove-doc-btn" onclick="event.stopPropagation();removeDoc('${memberId}','voterBack')">✕</button>
-                                    <input type="file" id="docInput_voterBack_${memberId}" accept="image/*" onchange="handleDocUpload(event,'${memberId}','voterBack')">
+                                <div class="doc-upload-area ${member.voterBack ? 'has-doc' : ''}" id="docArea_voterBack_${memberId}">
+                                    ${member.voterBack ? 
+                                        `<img class="doc-preview" src="${member.voterBack}" alt="Voter Back">
+                                        <button class="remove-doc-btn" onclick="event.stopPropagation();removeDoc('${memberId}','voterBack')">✕</button>` : 
+                                        `<span class="doc-icon">📷</span>
+                                        <span class="doc-label-text">Tap to upload</span>
+                                        <div class="photo-actions-compact">
+                                            <button class="btn-camera" onclick="event.stopPropagation();openCamera('${memberId}','voterBack')">📸 Camera</button>
+                                            <button class="btn-gallery" onclick="event.stopPropagation();document.getElementById('docInput_voterBack_${memberId}').click()">🖼️ Gallery</button>
+                                        </div>`
+                                    }
+                                    <input type="file" class="camera-input" id="docInput_voterBack_${memberId}" accept="image/*" capture="environment" onchange="handleDocUpload(event,'${memberId}','voterBack')">
                                 </div>
                                 <input type="hidden" id="doc_voterBack_${memberId}" value="${member.voterBack || ''}">
                             </div>
@@ -1891,10 +1985,18 @@
                         <div class="member-doc-row">
                             <div class="member-doc-item" style="grid-column:1/2;">
                                 <span class="doc-label">📄 Voter Slip</span>
-                                <div class="doc-upload-area ${member.voterSlip ? 'has-doc' : ''}" id="docArea_voterSlip_${memberId}" onclick="document.getElementById('docInput_voterSlip_${memberId}').click()">
-                                    ${member.voterSlip ? `<img class="doc-preview" src="${member.voterSlip}" alt="Voter Slip">` : `<span class="doc-icon">📷</span><span class="doc-label-text">Tap to upload</span>`}
-                                    <button class="remove-doc-btn" onclick="event.stopPropagation();removeDoc('${memberId}','voterSlip')">✕</button>
-                                    <input type="file" id="docInput_voterSlip_${memberId}" accept="image/*" onchange="handleDocUpload(event,'${memberId}','voterSlip')">
+                                <div class="doc-upload-area ${member.voterSlip ? 'has-doc' : ''}" id="docArea_voterSlip_${memberId}">
+                                    ${member.voterSlip ? 
+                                        `<img class="doc-preview" src="${member.voterSlip}" alt="Voter Slip">
+                                        <button class="remove-doc-btn" onclick="event.stopPropagation();removeDoc('${memberId}','voterSlip')">✕</button>` : 
+                                        `<span class="doc-icon">📷</span>
+                                        <span class="doc-label-text">Tap to upload</span>
+                                        <div class="photo-actions-compact">
+                                            <button class="btn-camera" onclick="event.stopPropagation();openCamera('${memberId}','voterSlip')">📸 Camera</button>
+                                            <button class="btn-gallery" onclick="event.stopPropagation();document.getElementById('docInput_voterSlip_${memberId}').click()">🖼️ Gallery</button>
+                                        </div>`
+                                    }
+                                    <input type="file" class="camera-input" id="docInput_voterSlip_${memberId}" accept="image/*" capture="environment" onchange="handleDocUpload(event,'${memberId}','voterSlip')">
                                 </div>
                                 <input type="hidden" id="doc_voterSlip_${memberId}" value="${member.voterSlip || ''}">
                             </div>
@@ -1908,7 +2010,20 @@
         }
 
         // ============================================
-        // DOCUMENT UPLOAD
+        // CAMERA CAPTURE FUNCTION
+        // ============================================
+        function openCamera(memberId, field) {
+            const input = document.getElementById(`docInput_${field}_${memberId}`);
+            if (input) {
+                // Ensure capture attribute is set for camera
+                input.setAttribute('capture', 'environment');
+                // Trigger click
+                input.click();
+            }
+        }
+
+        // ============================================
+        // DOCUMENT UPLOAD WITH CAMERA SUPPORT
         // ============================================
         let currentDocData = null;
         let currentDocMemberId = null;
@@ -1917,8 +2032,18 @@
         function handleDocUpload(event, memberId, field) {
             const file = event.target.files[0];
             if (!file) return;
+            
             if (!file.type.startsWith('image/')) {
                 showMessage('❌ Please select an image file.', 'error');
+                event.target.value = '';
+                return;
+            }
+
+            // Check file size and compress if needed
+            const maxSize = 5 * 1024 * 1024; // 5MB
+            if (file.size > maxSize) {
+                showMessage('⚠️ Image is large, compressing...', 'warning');
+                compressImage(file, memberId, field);
                 return;
             }
 
@@ -1934,6 +2059,54 @@
             event.target.value = '';
         }
 
+        function compressImage(file, memberId, field) {
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const img = new Image();
+                img.onload = function() {
+                    const canvas = document.createElement('canvas');
+                    const MAX_WIDTH = 1200;
+                    const MAX_HEIGHT = 1200;
+                    let width = img.width;
+                    let height = img.height;
+
+                    if (width > height) {
+                        if (width > MAX_WIDTH) {
+                            height *= MAX_WIDTH / width;
+                            width = MAX_WIDTH;
+                        }
+                    } else {
+                        if (height > MAX_HEIGHT) {
+                            width *= MAX_HEIGHT / height;
+                            height = MAX_HEIGHT;
+                        }
+                    }
+
+                    canvas.width = width;
+                    canvas.height = height;
+                    const ctx = canvas.getContext('2d');
+                    ctx.drawImage(img, 0, 0, width, height);
+
+                    const compressedDataUrl = canvas.toDataURL('image/jpeg', 0.8);
+                    
+                    fetch(compressedDataUrl)
+                        .then(res => res.blob())
+                        .then(blob => {
+                            const compressedFile = new File([blob], file.name, { type: 'image/jpeg' });
+                            currentDocMemberId = memberId;
+                            currentDocField = field;
+                            currentDocData = compressedFile;
+                            openCropperForDoc(compressedDataUrl);
+                        });
+                };
+                img.src = e.target.result;
+            };
+            reader.readAsDataURL(file);
+        }
+
+        // ============================================
+        // CROPPER
+        // ============================================
         function openCropperForDoc(imageDataURL) {
             const img = document.getElementById('cropperImage');
             img.src = imageDataURL;
@@ -1948,20 +2121,26 @@
                 const heightPercent = (cropSize / imgRect.height) * 100;
                 const leftPercent = (cropX / imgRect.width) * 100;
                 const topPercent = (cropY / imgRect.height) * 100;
+                
                 box.style.left = leftPercent + '%';
                 box.style.top = topPercent + '%';
                 box.style.width = widthPercent + '%';
                 box.style.height = heightPercent + '%';
                 box.dataset.imgWidth = imgRect.width;
                 box.dataset.imgHeight = imgRect.height;
+                
                 APP.cropperData = {
                     imageData: imageDataURL,
                     memberId: currentDocMemberId,
                     field: currentDocField,
                     file: currentDocData
                 };
+                
+                document.getElementById('cropperModal').classList.add('show');
+                
+                isDragging = false;
+                isResizing = false;
             };
-            document.getElementById('cropperModal').classList.add('show');
         }
 
         function closeCropper() {
@@ -1984,7 +2163,6 @@
             const canvas = document.createElement('canvas');
             const ctx = canvas.getContext('2d');
 
-            // Load image and crop
             const cropImg = new Image();
             cropImg.src = APP.cropperData.imageData;
 
@@ -2005,8 +2183,6 @@
             });
 
             const croppedDataURL = canvas.toDataURL('image/jpeg', 0.85);
-
-            // Upload the cropped image
             const base64Data = croppedDataURL.split(',')[1];
             const memberId = APP.cropperData.memberId;
             const field = APP.cropperData.field;
@@ -2032,17 +2208,16 @@
                 const result = await response.json();
 
                 if (result.success) {
-                    // Update the hidden input and preview
                     document.getElementById(`doc_${field}_${memberId}`).value = result.fileUrl;
+                    
                     const area = document.getElementById(`docArea_${field}_${memberId}`);
                     area.classList.add('has-doc');
                     area.innerHTML = `
                         <img class="doc-preview" src="${result.fileUrl}" alt="${field}">
                         <button class="remove-doc-btn" onclick="event.stopPropagation();removeDoc('${memberId}','${field}')">✕</button>
-                        <input type="file" id="docInput_${field}_${memberId}" accept="image/*" onchange="handleDocUpload(event,'${memberId}','${field}')">
+                        <input type="file" class="camera-input" id="docInput_${field}_${memberId}" accept="image/*" capture="environment" onchange="handleDocUpload(event,'${memberId}','${field}')">
                     `;
 
-                    // Update member data
                     const member = APP.members.find(m => m.memberId === memberId);
                     if (member) {
                         member[field] = result.fileUrl;
@@ -2052,7 +2227,6 @@
                     showMessage('✅ Document uploaded successfully!', 'success');
                     setTimeout(() => hideMessage(), 2000);
 
-                    // Update card status
                     const card = document.getElementById(`memberCard_${memberId}`);
                     if (card) card.classList.add('uploaded');
                 } else {
@@ -2067,19 +2241,22 @@
 
         function removeDoc(memberId, field) {
             document.getElementById(`doc_${field}_${memberId}`).value = '';
+            
             const area = document.getElementById(`docArea_${field}_${memberId}`);
             area.classList.remove('has-doc');
             area.innerHTML = `
                 <span class="doc-icon">📷</span>
                 <span class="doc-label-text">Tap to upload</span>
-                <input type="file" id="docInput_${field}_${memberId}" accept="image/*" onchange="handleDocUpload(event,'${memberId}','${field}')">
+                <div class="photo-actions-compact">
+                    <button class="btn-camera" onclick="event.stopPropagation();openCamera('${memberId}','${field}')">📸 Camera</button>
+                    <button class="btn-gallery" onclick="event.stopPropagation();document.getElementById('docInput_${field}_${memberId}').click()">🖼️ Gallery</button>
+                </div>
+                <input type="file" class="camera-input" id="docInput_${field}_${memberId}" accept="image/*" capture="environment" onchange="handleDocUpload(event,'${memberId}','${field}')">
             `;
 
-            // Update member data
             const member = APP.members.find(m => m.memberId === memberId);
             if (member) {
                 member[field] = '';
-                // Check if any docs remain
                 const hasDocs = member.aadharFront || member.aadharBack || member.voterFront || member.voterBack || member.voterSlip;
                 if (!hasDocs) {
                     member.isUploaded = false;
@@ -2271,7 +2448,6 @@
             const btnText = document.getElementById('saveAllBtnText');
             showLoading('saveAllBtn', 'saveAllBtnText', 'Saving...');
 
-            // Collect all member data
             const membersData = [];
             let hasError = false;
 
@@ -2305,7 +2481,6 @@
             }
 
             if (!APP.isOnline) {
-                // Save locally for offline sync
                 try {
                     const pending = JSON.parse(localStorage.getItem('pendingMembers') || '[]');
                     membersData.forEach(m => {
@@ -2344,30 +2519,16 @@
                 if (result.success) {
                     showMessage(`✅ ${result.message}`, 'success');
                     setTimeout(() => hideMessage(), 3000);
-                    // Mark all as uploaded
                     APP.members.forEach(m => {
                         m.isUploaded = true;
                         const card = document.getElementById(`memberCard_${m.memberId}`);
                         if (card) card.classList.add('uploaded');
                     });
-                    // Update badges
-                    document.querySelectorAll('.member-badge.uploaded').forEach(el => el.remove());
-                    document.querySelectorAll('.member-card').forEach(card => {
-                        const header = card.querySelector('.member-card-header');
-                        if (header) {
-                            const badge = document.createElement('span');
-                            badge.className = 'member-badge uploaded';
-                            badge.textContent = '✅ Uploaded';
-                            header.querySelector('span:last-child').appendChild(badge);
-                        }
-                    });
-                    // Clear pending
                     localStorage.removeItem('pendingMembers');
                 } else {
                     showMessage('❌ ' + (result.message || 'Save failed'), 'error');
                 }
             } catch (error) {
-                // Save offline on error
                 try {
                     const pending = JSON.parse(localStorage.getItem('pendingMembers') || '[]');
                     membersData.forEach(m => {
@@ -2490,7 +2651,8 @@
                 '📌 Search by Application No, Head of Family, or Mobile\n' +
                 '📌 Click on a search result to view family members\n' +
                 '📌 Each member has fields for Aadhar & Voter documents\n' +
-                '📌 Tap document area → Crop photo → Upload\n' +
+                '📌 Tap "Camera" to take photo directly or "Gallery" to select existing\n' +
+                '📌 Crop the photo after taking/selecting it\n' +
                 '📌 Enter member names and save all at once\n' +
                 '📌 Green border = Document uploaded\n' +
                 '📌 Works offline - data saved locally, syncs when online',
@@ -2526,10 +2688,8 @@
         // Periodic sync check
         setInterval(() => {
             if (APP.isOnline && APP.sessionToken) {
-                // Check for pending members and sync
                 const pending = JSON.parse(localStorage.getItem('pendingMembers') || '[]');
                 if (pending.length > 0 && APP.currentApplication) {
-                    // Auto-sync if we're viewing the same application
                     const currentApp = APP.currentApplication;
                     const matching = pending.filter(m => m.applicationNo === currentApp.applicationNo);
                     if (matching.length > 0 && !document.getElementById('saveAllBtn').disabled) {
