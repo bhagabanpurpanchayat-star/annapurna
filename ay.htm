@@ -1,0 +1,2544 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
+    <title>Data Source - Family Member Management</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+        }
+
+        body {
+            background: linear-gradient(135deg, #0f0c29 0%, #1a1a3e 30%, #24243e 60%, #1a1a3e 100%);
+            min-height: 100vh;
+            padding: 10px 10px 30px;
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            position: relative;
+            overflow-x: hidden;
+        }
+
+        body::before {
+            content: '';
+            position: fixed;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle at 30% 50%, rgba(99, 179, 237, 0.08) 0%, transparent 50%),
+                        radial-gradient(circle at 70% 80%, rgba(183, 148, 244, 0.08) 0%, transparent 50%),
+                        radial-gradient(circle at 50% 20%, rgba(246, 224, 94, 0.05) 0%, transparent 50%);
+            animation: floatBg 20s ease-in-out infinite alternate;
+            z-index: 0;
+        }
+
+        @keyframes floatBg {
+            0% { transform: translate(0, 0) rotate(0deg); }
+            100% { transform: translate(2%, 1%) rotate(3deg); }
+        }
+
+        .container {
+            background: rgba(255, 255, 255, 0.06);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            max-width: 550px;
+            width: 100%;
+            border-radius: 24px;
+            padding: 18px 16px 22px;
+            box-shadow: 0 8px 40px rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.08);
+            border: 1px solid rgba(255, 255, 255, 0.06);
+            position: relative;
+            z-index: 1;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 16px;
+            padding-bottom: 12px;
+            border-bottom: 2px solid rgba(255, 255, 255, 0.06);
+        }
+
+        .header h1 {
+            background: linear-gradient(135deg, #63b3ed 0%, #b794f4 30%, #f6ad55 60%, #f6e05e 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            font-size: 24px;
+            font-weight: 800;
+            letter-spacing: -0.5px;
+            filter: drop-shadow(0 2px 10px rgba(99, 179, 237, 0.2));
+        }
+
+        .header p {
+            color: #a0aec0;
+            font-size: 14px;
+            margin-top: 4px;
+            font-weight: 500;
+        }
+
+        .dashboard-header-compact {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+            padding: 10px 14px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 14px;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .user-info-compact {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .user-avatar-compact {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #63b3ed 0%, #b794f4 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #0f0c29;
+            font-weight: 800;
+            font-size: 18px;
+            text-transform: uppercase;
+            flex-shrink: 0;
+            border: 2px solid rgba(99, 179, 237, 0.3);
+            box-shadow: 0 0 20px rgba(99, 179, 237, 0.1);
+        }
+
+        .user-details-compact {
+            line-height: 1.4;
+        }
+
+        .user-name-compact {
+            font-weight: 700;
+            color: #ffffff;
+            font-size: 16px;
+            text-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+        }
+
+        .user-contact-compact {
+            font-size: 12px;
+            color: #a0aec0;
+        }
+
+        .user-status-compact {
+            font-size: 10px;
+            padding: 3px 12px;
+            border-radius: 10px;
+            display: inline-block;
+            font-weight: 700;
+            margin-top: 2px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .user-status-compact.approved {
+            background: rgba(72, 187, 120, 0.25);
+            color: #68d391;
+            border: 1px solid rgba(72, 187, 120, 0.3);
+        }
+
+        .user-status-compact.pending {
+            background: rgba(237, 137, 54, 0.25);
+            color: #f6ad55;
+            border: 1px solid rgba(237, 137, 54, 0.3);
+        }
+
+        .user-status-compact.rejected {
+            background: rgba(229, 62, 62, 0.25);
+            color: #fc8181;
+            border: 1px solid rgba(229, 62, 62, 0.3);
+        }
+
+        .logout-btn-compact {
+            padding: 7px 16px;
+            background: linear-gradient(135deg, #fc8181 0%, #e53e3e 100%);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 12px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            flex-shrink: 0;
+            box-shadow: 0 4px 15px rgba(229, 62, 62, 0.2);
+        }
+
+        .logout-btn-compact:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(229, 62, 62, 0.3);
+        }
+
+        .logout-btn-compact:active {
+            transform: scale(0.95);
+        }
+
+        .welcome-compact {
+            text-align: center;
+            padding: 8px 0 12px;
+        }
+
+        .welcome-compact h2 {
+            color: #ffffff;
+            font-size: 20px;
+            text-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+        }
+
+        .welcome-compact h2 span {
+            background: linear-gradient(135deg, #63b3ed, #b794f4);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .welcome-compact p {
+            color: #a0aec0;
+            font-size: 13px;
+            margin-top: 3px;
+        }
+
+        .quick-actions-compact {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr 1fr;
+            gap: 8px;
+            margin-top: 8px;
+            margin-bottom: 12px;
+        }
+
+        .quick-action-btn-compact {
+            padding: 12px 4px;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1.5px solid rgba(255, 255, 255, 0.05);
+            border-radius: 12px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            backdrop-filter: blur(10px);
+        }
+
+        .quick-action-btn-compact:hover {
+            transform: translateY(-2px);
+            background: rgba(255, 255, 255, 0.1);
+            border-color: rgba(255, 255, 255, 0.15);
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+        }
+
+        .quick-action-btn-compact:active {
+            transform: scale(0.95);
+        }
+
+        .quick-action-btn-compact .icon {
+            font-size: 24px;
+            display: block;
+            margin-bottom: 3px;
+        }
+
+        .quick-action-btn-compact .label {
+            font-size: 10px;
+            font-weight: 700;
+            color: #e2e8f0;
+            letter-spacing: 0.3px;
+        }
+
+        .quick-action-btn-compact.primary-action {
+            background: linear-gradient(135deg, rgba(99, 179, 237, 0.15) 0%, rgba(183, 148, 244, 0.15) 100%);
+            border-color: rgba(99, 179, 237, 0.2);
+        }
+
+        .quick-action-btn-compact.primary-action .label {
+            color: #63b3ed;
+        }
+
+        .quick-action-btn-compact.primary-action:hover {
+            background: linear-gradient(135deg, rgba(99, 179, 237, 0.25) 0%, rgba(183, 148, 244, 0.25) 100%);
+            box-shadow: 0 4px 20px rgba(99, 179, 237, 0.1);
+        }
+
+        .sync-status {
+            font-size: 12px;
+            color: rgba(255, 255, 255, 0.6);
+            margin-top: 5px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 14px;
+        }
+
+        .sync-status .online {
+            color: #68d391;
+        }
+
+        .sync-status .offline {
+            color: #f6ad55;
+        }
+
+        .sync-status .syncing {
+            color: #63b3ed;
+            animation: pulse 1s ease-in-out infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.3; }
+        }
+
+        .tabs {
+            display: flex;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 14px;
+            padding: 4px;
+            margin-bottom: 16px;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .tab {
+            flex: 1;
+            padding: 12px;
+            text-align: center;
+            border: none;
+            background: transparent;
+            font-size: 15px;
+            font-weight: 700;
+            color: #a0aec0;
+            cursor: pointer;
+            border-radius: 10px;
+            transition: all 0.3s ease;
+        }
+
+        .tab.active {
+            background: linear-gradient(135deg, rgba(99, 179, 237, 0.3) 0%, rgba(183, 148, 244, 0.3) 100%);
+            color: #ffffff;
+            box-shadow: 0 4px 20px rgba(99, 179, 237, 0.15);
+            border: 1px solid rgba(99, 179, 237, 0.2);
+        }
+
+        .tab:active {
+            transform: scale(0.96);
+        }
+
+        .form-group {
+            margin-bottom: 14px;
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+            margin-bottom: 14px;
+        }
+
+        .form-row .form-group {
+            margin-bottom: 0;
+        }
+
+        label {
+            display: block;
+            font-size: 13px;
+            font-weight: 700;
+            color: #e2e8f0;
+            margin-bottom: 5px;
+            letter-spacing: 0.3px;
+        }
+
+        .required {
+            color: #fc8181;
+            margin-left: 3px;
+        }
+
+        input, select {
+            width: 100%;
+            padding: 12px 14px;
+            font-size: 15px;
+            border: 2px solid rgba(255, 255, 255, 0.08);
+            border-radius: 12px;
+            transition: all 0.3s ease;
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(10px);
+            color: #ffffff;
+            font-weight: 500;
+        }
+
+        input::placeholder {
+            color: rgba(255, 255, 255, 0.4);
+            font-size: 13px;
+        }
+
+        select {
+            color: #ffffff;
+            -webkit-appearance: none;
+            appearance: none;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='rgba(255,255,255,0.6)' d='M6 8L1 3h10z'/%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 14px center;
+            padding-right: 40px;
+            cursor: pointer;
+        }
+
+        select option {
+            background: #1a1a3e;
+            color: #ffffff;
+            padding: 8px;
+        }
+
+        input:focus, select:focus {
+            outline: none;
+            border-color: rgba(99, 179, 237, 0.4);
+            background: rgba(255, 255, 255, 0.08);
+            box-shadow: 0 0 0 4px rgba(99, 179, 237, 0.05);
+        }
+
+        input:read-only {
+            background: rgba(72, 187, 120, 0.08);
+            border-color: rgba(72, 187, 120, 0.2);
+            color: #68d391;
+        }
+
+        .password-toggle {
+            position: relative;
+        }
+
+        .password-toggle input {
+            padding-right: 48px;
+        }
+
+        .toggle-btn {
+            position: absolute;
+            right: 14px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: none;
+            border: none;
+            font-size: 18px;
+            cursor: pointer;
+            color: rgba(255, 255, 255, 0.4);
+            padding: 4px;
+            transition: 0.2s;
+        }
+
+        .toggle-btn:hover {
+            color: rgba(255, 255, 255, 0.8);
+        }
+
+        .submit-btn {
+            width: 100%;
+            padding: 15px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 14px;
+            font-size: 17px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-top: 8px;
+            box-shadow: 0 4px 25px rgba(102, 126, 234, 0.3);
+            letter-spacing: 0.5px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .submit-btn::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 60%);
+            opacity: 0;
+            transition: 0.5s;
+        }
+
+        .submit-btn:hover::before {
+            opacity: 1;
+        }
+
+        .submit-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 30px rgba(102, 126, 234, 0.4);
+        }
+
+        .submit-btn:active {
+            transform: scale(0.98);
+        }
+
+        .submit-btn:disabled {
+            opacity: 0.6;
+            transform: scale(1);
+        }
+
+        .submit-btn.secondary {
+            background: linear-gradient(135deg, #48bb78 0%, #38a169 100%);
+            box-shadow: 0 4px 25px rgba(72, 187, 120, 0.25);
+        }
+
+        .submit-btn.secondary:hover {
+            box-shadow: 0 6px 30px rgba(72, 187, 120, 0.35);
+        }
+
+        .btn-cancel {
+            width: 100%;
+            padding: 13px;
+            background: rgba(255, 255, 255, 0.05);
+            color: #a0aec0;
+            border: 1px solid rgba(255, 255, 255, 0.06);
+            border-radius: 12px;
+            font-size: 15px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-top: 8px;
+        }
+
+        .btn-cancel:hover {
+            background: rgba(255, 255, 255, 0.08);
+            color: #e2e8f0;
+            border-color: rgba(255, 255, 255, 0.12);
+        }
+
+        .btn-cancel:active {
+            transform: scale(0.98);
+        }
+
+        .hint-text {
+            font-size: 12px;
+            color: rgba(255, 255, 255, 0.4);
+            margin-top: 4px;
+        }
+
+        .message {
+            display: none;
+            padding: 12px 16px;
+            border-radius: 12px;
+            text-align: center;
+            font-weight: 700;
+            margin-top: 12px;
+            animation: slideUp 0.3s ease;
+            word-wrap: break-word;
+            white-space: pre-line;
+            font-size: 15px;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.06);
+        }
+
+        .message.success {
+            background: rgba(72, 187, 120, 0.15);
+            color: #68d391;
+            border-color: rgba(72, 187, 120, 0.2);
+        }
+
+        .message.error {
+            background: rgba(229, 62, 62, 0.15);
+            color: #fc8181;
+            border-color: rgba(229, 62, 62, 0.2);
+        }
+
+        .message.info {
+            background: rgba(66, 153, 225, 0.15);
+            color: #63b3ed;
+            border-color: rgba(66, 153, 225, 0.2);
+        }
+
+        .message.warning {
+            background: rgba(237, 137, 54, 0.15);
+            color: #f6ad55;
+            border-color: rgba(237, 137, 54, 0.2);
+        }
+
+        @keyframes slideUp {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .loading {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid rgba(255,255,255,0.2);
+            border-radius: 50%;
+            border-top-color: #ffffff;
+            animation: spin 0.7s ease infinite;
+            vertical-align: middle;
+            margin-right: 8px;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .hidden {
+            display: none !important;
+        }
+
+        .form-footer {
+            text-align: center;
+            margin-top: 14px;
+            font-size: 14px;
+            color: #a0aec0;
+        }
+
+        .form-footer a {
+            color: #63b3ed;
+            font-weight: 700;
+            text-decoration: none;
+        }
+
+        .form-footer a:hover {
+            text-decoration: underline;
+            color: #b794f4;
+        }
+
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.7);
+            backdrop-filter: blur(8px);
+            z-index: 1000;
+            padding: 20px;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal-overlay.show {
+            display: flex;
+        }
+
+        .modal {
+            background: rgba(26, 11, 46, 0.95);
+            backdrop-filter: blur(20px);
+            max-width: 400px;
+            width: 100%;
+            border-radius: 18px;
+            padding: 24px;
+            animation: slideUp 0.3s ease;
+            box-shadow: 0 15px 50px rgba(0, 0, 0, 0.5);
+            border: 1px solid rgba(255, 255, 255, 0.06);
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 18px;
+        }
+
+        .modal-header h3 {
+            color: #ffffff;
+            font-size: 20px;
+        }
+
+        .modal-close {
+            background: none;
+            border: none;
+            font-size: 24px;
+            cursor: pointer;
+            color: #a0aec0;
+            padding: 4px 8px;
+            transition: all 0.3s ease;
+        }
+
+        .modal-close:hover {
+            color: #fc8181;
+            transform: rotate(90deg);
+        }
+
+        .photo-attach-area {
+            border: 2px dashed rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            padding: 14px;
+            text-align: center;
+            transition: all 0.3s ease;
+            background: rgba(255, 255, 255, 0.03);
+            min-height: 100px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+        }
+
+        .photo-attach-area.has-photo {
+            border-color: rgba(72, 187, 120, 0.3);
+            background: rgba(72, 187, 120, 0.05);
+        }
+
+        .photo-attach-area .photo-icon {
+            font-size: 36px;
+            margin-bottom: 4px;
+        }
+
+        .photo-attach-area .photo-text {
+            color: #e2e8f0;
+            font-size: 14px;
+        }
+
+        .photo-attach-area .photo-sub-text {
+            color: rgba(255, 255, 255, 0.4);
+            font-size: 12px;
+            margin-top: 2px;
+        }
+
+        .photo-attach-area .photo-preview-img {
+            max-width: 100%;
+            max-height: 120px;
+            border-radius: 8px;
+            margin-top: 6px;
+            object-fit: contain;
+        }
+
+        .photo-attach-area .remove-photo-btn {
+            position: absolute;
+            top: 8px;
+            right: 8px;
+            background: rgba(229, 62, 62, 0.8);
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 28px;
+            height: 28px;
+            font-size: 14px;
+            cursor: pointer;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+        }
+
+        .photo-attach-area.has-photo .remove-photo-btn {
+            display: flex;
+        }
+
+        .photo-attach-area .photo-actions {
+            display: flex;
+            gap: 10px;
+            margin-top: 8px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        .photo-attach-area .photo-actions button {
+            padding: 8px 18px;
+            border: none;
+            border-radius: 10px;
+            font-weight: 700;
+            cursor: pointer;
+            font-size: 13px;
+            transition: all 0.3s ease;
+        }
+
+        .photo-attach-area .btn-camera {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.2);
+        }
+
+        .photo-attach-area .btn-gallery {
+            background: linear-gradient(135deg, #48bb78 0%, #38a169 100%);
+            color: white;
+            box-shadow: 0 4px 15px rgba(72, 187, 120, 0.2);
+        }
+
+        .photo-attach-area .photo-actions button:hover {
+            transform: scale(1.05);
+        }
+
+        .photo-attach-area .photo-actions button:active {
+            transform: scale(0.95);
+        }
+
+        .photo-attach-area input[type="file"] {
+            display: none;
+        }
+
+        .photo-status {
+            font-size: 13px;
+            color: #e2e8f0;
+            margin-top: 5px;
+            display: none;
+        }
+
+        .photo-status.active {
+            display: block;
+        }
+
+        .photo-status.attached {
+            color: #68d391;
+        }
+
+        .photo-status.error {
+            color: #fc8181;
+        }
+
+        /* Search & Results */
+        .search-section {
+            margin-top: 12px;
+        }
+
+        .search-results {
+            margin-top: 12px;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+
+        .search-result-item {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 12px;
+            padding: 12px 14px;
+            margin-bottom: 8px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .search-result-item:hover {
+            background: rgba(255, 255, 255, 0.1);
+            border-color: rgba(99, 179, 237, 0.2);
+            transform: translateX(4px);
+        }
+
+        .search-result-item:active {
+            transform: scale(0.98);
+        }
+
+        .search-result-item .result-app-no {
+            font-size: 14px;
+            font-weight: 700;
+            color: #63b3ed;
+        }
+
+        .search-result-item .result-hof {
+            font-size: 16px;
+            font-weight: 700;
+            color: #ffffff;
+            margin-top: 2px;
+        }
+
+        .search-result-item .result-mobile {
+            font-size: 13px;
+            color: #a0aec0;
+        }
+
+        .search-result-item .result-members {
+            font-size: 12px;
+            color: #b794f4;
+            margin-top: 2px;
+        }
+
+        .no-results {
+            text-align: center;
+            padding: 30px 20px;
+            color: #a0aec0;
+            font-size: 15px;
+        }
+
+        .no-results .icon {
+            font-size: 40px;
+            display: block;
+            margin-bottom: 10px;
+        }
+
+        /* Member Form */
+        .member-card {
+            background: rgba(255, 255, 255, 0.04);
+            border-radius: 14px;
+            padding: 16px;
+            margin-bottom: 14px;
+            border: 1px solid rgba(255, 255, 255, 0.06);
+            transition: all 0.3s ease;
+        }
+
+        .member-card.uploaded {
+            border-color: rgba(72, 187, 120, 0.2);
+            background: rgba(72, 187, 120, 0.05);
+        }
+
+        .member-card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
+        }
+
+        .member-card-header .member-title {
+            font-size: 16px;
+            font-weight: 700;
+            color: #ffffff;
+        }
+
+        .member-card-header .member-badge {
+            font-size: 11px;
+            padding: 4px 12px;
+            border-radius: 10px;
+            font-weight: 700;
+            text-transform: uppercase;
+        }
+
+        .member-card-header .member-badge.head {
+            background: rgba(246, 224, 94, 0.2);
+            color: #f6e05e;
+            border: 1px solid rgba(246, 224, 94, 0.2);
+        }
+
+        .member-card-header .member-badge.member {
+            background: rgba(99, 179, 237, 0.2);
+            color: #63b3ed;
+            border: 1px solid rgba(99, 179, 237, 0.2);
+        }
+
+        .member-card-header .member-badge.uploaded {
+            background: rgba(72, 187, 120, 0.2);
+            color: #68d391;
+            border: 1px solid rgba(72, 187, 120, 0.2);
+        }
+
+        .member-id-display {
+            font-size: 12px;
+            color: #a0aec0;
+            margin-bottom: 10px;
+            font-family: monospace;
+        }
+
+        .member-doc-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            margin-top: 8px;
+        }
+
+        .member-doc-item .doc-label {
+            font-size: 11px;
+            color: #a0aec0;
+            font-weight: 600;
+            margin-bottom: 4px;
+            display: block;
+        }
+
+        .member-doc-item .doc-upload-area {
+            border: 1.5px dashed rgba(255, 255, 255, 0.08);
+            border-radius: 8px;
+            padding: 8px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            min-height: 50px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            background: rgba(255, 255, 255, 0.02);
+            position: relative;
+        }
+
+        .member-doc-item .doc-upload-area.has-doc {
+            border-color: rgba(72, 187, 120, 0.3);
+            background: rgba(72, 187, 120, 0.05);
+        }
+
+        .member-doc-item .doc-upload-area .doc-icon {
+            font-size: 20px;
+        }
+
+        .member-doc-item .doc-upload-area .doc-label-text {
+            font-size: 10px;
+            color: rgba(255, 255, 255, 0.4);
+        }
+
+        .member-doc-item .doc-upload-area .doc-preview {
+            max-width: 100%;
+            max-height: 50px;
+            border-radius: 4px;
+        }
+
+        .member-doc-item .doc-upload-area .remove-doc-btn {
+            position: absolute;
+            top: -6px;
+            right: -6px;
+            background: rgba(229, 62, 62, 0.8);
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 20px;
+            height: 20px;
+            font-size: 12px;
+            cursor: pointer;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+        }
+
+        .member-doc-item .doc-upload-area.has-doc .remove-doc-btn {
+            display: flex;
+        }
+
+        .member-doc-item input[type="file"] {
+            display: none;
+        }
+
+        .save-member-btn {
+            width: 100%;
+            padding: 12px;
+            background: linear-gradient(135deg, #48bb78 0%, #38a169 100%);
+            color: white;
+            border: none;
+            border-radius: 12px;
+            font-size: 15px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-top: 6px;
+            box-shadow: 0 4px 20px rgba(72, 187, 120, 0.2);
+        }
+
+        .save-member-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 25px rgba(72, 187, 120, 0.3);
+        }
+
+        .save-member-btn:active {
+            transform: scale(0.98);
+        }
+
+        .save-member-btn:disabled {
+            opacity: 0.6;
+            transform: scale(1);
+        }
+
+        .save-all-btn {
+            width: 100%;
+            padding: 14px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 14px;
+            font-size: 17px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-top: 16px;
+            box-shadow: 0 4px 25px rgba(102, 126, 234, 0.3);
+        }
+
+        .save-all-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 30px rgba(102, 126, 234, 0.4);
+        }
+
+        .save-all-btn:active {
+            transform: scale(0.98);
+        }
+
+        .save-all-btn:disabled {
+            opacity: 0.6;
+            transform: scale(1);
+        }
+
+        .back-to-search-btn {
+            padding: 10px 20px;
+            background: rgba(255, 255, 255, 0.05);
+            color: #a0aec0;
+            border: 1px solid rgba(255, 255, 255, 0.06);
+            border-radius: 10px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-bottom: 12px;
+        }
+
+        .back-to-search-btn:hover {
+            background: rgba(255, 255, 255, 0.08);
+            color: #e2e8f0;
+        }
+
+        .back-to-search-btn:active {
+            transform: scale(0.95);
+        }
+
+        .loading-spinner {
+            display: inline-block;
+            width: 16px;
+            height: 16px;
+            border: 2px solid rgba(255,255,255,0.2);
+            border-radius: 50%;
+            border-top-color: #ffffff;
+            animation: spin 0.7s ease infinite;
+            vertical-align: middle;
+            margin-right: 6px;
+        }
+
+        @media (max-width: 480px) {
+            .form-row {
+                grid-template-columns: 1fr;
+                gap: 0;
+            }
+            
+            .form-row .form-group {
+                margin-bottom: 14px;
+            }
+            
+            .container {
+                padding: 14px 12px 18px;
+            }
+            
+            input, select {
+                font-size: 16px;
+                padding: 14px 16px;
+            }
+            
+            .quick-actions-compact {
+                grid-template-columns: 1fr 1fr;
+                gap: 6px;
+            }
+            
+            .quick-action-btn-compact {
+                padding: 10px 4px;
+            }
+            
+            .quick-action-btn-compact .icon {
+                font-size: 22px;
+            }
+
+            .member-doc-row {
+                grid-template-columns: 1fr;
+            }
+
+            .photo-attach-area .photo-actions {
+                flex-direction: row;
+            }
+
+            .photo-attach-area .photo-actions button {
+                padding: 8px 14px;
+                font-size: 12px;
+            }
+
+            .header h1 {
+                font-size: 22px;
+            }
+
+            .tab {
+                font-size: 14px;
+                padding: 10px;
+            }
+
+            .submit-btn {
+                font-size: 16px;
+                padding: 14px;
+            }
+
+            .search-result-item {
+                padding: 10px 12px;
+            }
+        }
+
+        @media (min-width: 481px) and (max-width: 768px) {
+            .form-row {
+                grid-template-columns: 1fr 1fr;
+            }
+        }
+
+        ::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: rgba(255, 255, 255, 0.02);
+            border-radius: 10px;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: rgba(255, 255, 255, 0.2);
+        }
+    </style>
+</head>
+<body>
+    <div class="container" id="app">
+        <!-- Auth Section -->
+        <div id="authSection">
+            <div class="header">
+                <h1>🏛️ 🌾 অন্নপূর্ণা যোজনা</h1>
+                <p>Bhagabanppur Gram Panchayat</p>
+                <span style="color:yellow">Arbara-Chanchal-Malda</span>
+            </div>
+
+            <div class="tabs">
+                <button class="tab active" onclick="switchTab('signin')" id="signinTab">Sign In</button>
+                <button class="tab" onclick="switchTab('signup')" id="signupTab">Sign Up</button>
+            </div>
+
+            <!-- Sign In Form -->
+            <div id="signinForm">
+                <form onsubmit="return handleSignIn(event)" id="signinFormElement">
+                    <div class="form-group">
+                        <label>📱 Mobile Number <span class="required">*</span></label>
+                        <input type="tel" id="signinMobile" placeholder="Enter 10-digit mobile number" pattern="\d{10}" maxlength="10" required>
+                        <div class="hint-text">Enter the mobile number used during registration</div>
+                    </div>
+
+                    <div class="form-group">
+                        <label>🔒 Password <span class="required">*</span></label>
+                        <div class="password-toggle">
+                            <input type="password" id="signinPassword" placeholder="Enter your password" required>
+                            <button type="button" class="toggle-btn" onclick="togglePassword('signinPassword')">👁️</button>
+                        </div>
+                    </div>
+
+                    <button type="submit" class="submit-btn" id="signinBtn">
+                        <span id="signinBtnText">🚀 Sign In</span>
+                    </button>
+                </form>
+                <div class="form-footer">
+                    Don't have an account? <a href="#" onclick="switchTab('signup')">Sign Up</a>
+                </div>
+            </div>
+
+            <!-- Sign Up Form -->
+            <div id="signupForm" class="hidden">
+                <form onsubmit="return handleSignUp(event)" id="signupFormElement">
+                    <div class="form-group">
+                        <label>👤 Full Name <span class="required">*</span></label>
+                        <input type="text" id="signupName" placeholder="Enter your full name" required autocomplete="name">
+                    </div>
+
+                    <div class="form-group">
+                        <label>📱 Contact Number <span class="required">*</span></label>
+                        <input type="tel" id="signupContact" placeholder="10-digit mobile number" pattern="\d{10}" maxlength="10" required>
+                        <div class="hint-text">Enter 10-digit mobile number</div>
+                    </div>
+
+                    <div class="form-group">
+                        <label>🔒 Password <span class="required">*</span></label>
+                        <div class="password-toggle">
+                            <input type="password" id="signupPassword" placeholder="Min 6 characters" minlength="6" required>
+                            <button type="button" class="toggle-btn" onclick="togglePassword('signupPassword')">👁️</button>
+                        </div>
+                        <div class="hint-text">Must be at least 6 characters long</div>
+                    </div>
+
+                    <button type="submit" class="submit-btn" id="signupBtn">
+                        <span id="signupBtnText">✨ Create Account</span>
+                    </button>
+                </form>
+                <div class="form-footer">
+                    Already have an account? <a href="#" onclick="switchTab('signin')">Sign In</a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Dashboard Section -->
+        <div id="dashboardSection" class="hidden">
+            <!-- COMPACT HEADER -->
+            <div class="dashboard-header-compact">
+                <div class="user-info-compact">
+                    <div class="user-avatar-compact" id="userAvatarCompact">U</div>
+                    <div class="user-details-compact">
+                        <div class="user-name-compact" id="userNameCompact">User Name</div>
+                        <div class="user-contact-compact" id="userContactCompact">📱 9876543210</div>
+                        <span class="user-status-compact approved" id="userStatusBadgeCompact">Approved</span>
+                    </div>
+                </div>
+                <button class="logout-btn-compact" onclick="handleSignOut()">🚪 Logout</button>
+            </div>
+
+            <!-- COMPACT WELCOME -->
+            <div class="welcome-compact">
+                <h2>👋 Welcome, <span id="welcomeNameCompact">User</span>!</h2>
+                <p>Search & manage family member documents</p>
+                <div class="sync-status">
+                    <span id="syncIndicator">🔄 Syncing...</span>
+                    <span id="syncTime"></span>
+                    <span id="offlineBadge" class="hidden" style="color:#f6ad55;font-weight:700;">📡 OFFLINE</span>
+                </div>
+            </div>
+
+            <!-- COMPACT QUICK ACTIONS -->
+            <div class="quick-actions-compact">
+                <div class="quick-action-btn-compact primary-action" onclick="showSearch()">
+                    <span class="icon">🔍</span>
+                    <span class="label">Search</span>
+                </div>
+                <div class="quick-action-btn-compact" onclick="showChangePassword()">
+                    <span class="icon">🔑</span>
+                    <span class="label">Change Pwd</span>
+                </div>
+                <div class="quick-action-btn-compact" onclick="showUploadedMembers()">
+                    <span class="icon">📊</span>
+                    <span class="label">Uploaded</span>
+                </div>
+                <div class="quick-action-btn-compact" onclick="showHelp()">
+                    <span class="icon">❓</span>
+                    <span class="label">Help</span>
+                </div>
+            </div>
+
+            <!-- Search Section -->
+            <div id="searchSection" class="search-section">
+                <div class="form-group">
+                    <label>🔍 Search by Application No / Head of Family / Mobile</label>
+                    <div style="display:flex;gap:8px;">
+                        <input type="text" id="searchInput" placeholder="Enter search term..." style="flex:1;" onkeydown="if(event.key==='Enter') performSearch()">
+                        <button class="submit-btn" style="width:auto;padding:12px 20px;margin:0;" onclick="performSearch()">Search</button>
+                    </div>
+                    <div class="hint-text">Search by APPLICATION NO, HEAD OF FAMILY, or HOF MOBILE</div>
+                </div>
+
+                <div id="searchResults" class="search-results"></div>
+            </div>
+
+            <!-- Member Management Section -->
+            <div id="memberSection" class="hidden">
+                <button class="back-to-search-btn" onclick="backToSearch()">← Back to Search</button>
+                
+                <div id="memberHeader" style="margin-bottom:12px;">
+                    <h3 style="color:#ffffff;font-size:18px;" id="memberAppTitle">Application: ---</h3>
+                    <p style="color:#a0aec0;font-size:14px;" id="memberHofInfo">Head: --- | Mobile: ---</p>
+                </div>
+
+                <div id="memberList"></div>
+
+                <button class="save-all-btn" id="saveAllBtn" onclick="saveAllMembers()">
+                    <span id="saveAllBtnText">💾 Save All Members</span>
+                </button>
+            </div>
+        </div>
+
+        <!-- Message Display -->
+        <div id="message" class="message"></div>
+    </div>
+
+    <!-- Change Password Modal -->
+    <div class="modal-overlay" id="passwordModal">
+        <div class="modal">
+            <div class="modal-header">
+                <h3>🔑 Change Password</h3>
+                <button class="modal-close" onclick="closePasswordModal()">✕</button>
+            </div>
+            <form onsubmit="return handleChangePassword(event)" id="changePasswordForm">
+                <div class="form-group">
+                    <label>🔒 Current Password <span class="required">*</span></label>
+                    <div class="password-toggle">
+                        <input type="password" id="currentPassword" placeholder="Enter current password" required>
+                        <button type="button" class="toggle-btn" onclick="togglePassword('currentPassword')">👁️</button>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>🔑 New Password <span class="required">*</span></label>
+                    <div class="password-toggle">
+                        <input type="password" id="newPassword" placeholder="Min 6 characters" minlength="6" required>
+                        <button type="button" class="toggle-btn" onclick="togglePassword('newPassword')">👁️</button>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>✅ Confirm New Password <span class="required">*</span></label>
+                    <div class="password-toggle">
+                        <input type="password" id="confirmPassword" placeholder="Confirm new password" required>
+                        <button type="button" class="toggle-btn" onclick="togglePassword('confirmPassword')">👁️</button>
+                    </div>
+                </div>
+                <button type="submit" class="submit-btn" id="changePwdBtn">
+                    <span id="changePwdBtnText">🔄 Update Password</span>
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Cropper Modal -->
+    <div class="modal-overlay" id="cropperModal">
+        <div class="modal" style="max-width:480px;">
+            <div class="modal-header">
+                <h3>✂️ Crop Photo</h3>
+                <button class="modal-close" onclick="closeCropper()">✕</button>
+            </div>
+            <div style="position:relative;overflow:hidden;border-radius:12px;background:rgba(0,0,0,0.3);touch-action:none;user-select:none;-webkit-user-select:none;" id="cropperWrapper">
+                <img id="cropperImage" src="" alt="Crop" style="display:block;width:100%;height:auto;pointer-events:none;">
+                <div id="cropBox" style="position:absolute;border:2px solid #48bb78;box-shadow:0 0 0 9999px rgba(0,0,0,0.6);cursor:move;touch-action:none;user-select:none;-webkit-user-select:none;">
+                    <div class="crop-handle" style="position:absolute;width:16px;height:16px;background:#48bb78;border:2px solid white;border-radius:50%;box-shadow:0 0 15px rgba(72,187,120,0.3);top:-8px;left:-8px;cursor:nw-resize;"></div>
+                    <div class="crop-handle" style="position:absolute;width:16px;height:16px;background:#48bb78;border:2px solid white;border-radius:50%;box-shadow:0 0 15px rgba(72,187,120,0.3);top:-8px;right:-8px;cursor:ne-resize;"></div>
+                    <div class="crop-handle" style="position:absolute;width:16px;height:16px;background:#48bb78;border:2px solid white;border-radius:50%;box-shadow:0 0 15px rgba(72,187,120,0.3);bottom:-8px;left:-8px;cursor:sw-resize;"></div>
+                    <div class="crop-handle" style="position:absolute;width:16px;height:16px;background:#48bb78;border:2px solid white;border-radius:50%;box-shadow:0 0 15px rgba(72,187,120,0.3);bottom:-8px;right:-8px;cursor:se-resize;"></div>
+                    <div class="crop-handle" style="position:absolute;width:16px;height:16px;background:#48bb78;border:2px solid white;border-radius:50%;box-shadow:0 0 15px rgba(72,187,120,0.3);top:-8px;left:50%;transform:translateX(-50%);cursor:n-resize;"></div>
+                    <div class="crop-handle" style="position:absolute;width:16px;height:16px;background:#48bb78;border:2px solid white;border-radius:50%;box-shadow:0 0 15px rgba(72,187,120,0.3);bottom:-8px;left:50%;transform:translateX(-50%);cursor:s-resize;"></div>
+                    <div class="crop-handle" style="position:absolute;width:16px;height:16px;background:#48bb78;border:2px solid white;border-radius:50%;box-shadow:0 0 15px rgba(72,187,120,0.3);top:50%;left:-8px;transform:translateY(-50%);cursor:w-resize;"></div>
+                    <div class="crop-handle" style="position:absolute;width:16px;height:16px;background:#48bb78;border:2px solid white;border-radius:50%;box-shadow:0 0 15px rgba(72,187,120,0.3);top:50%;right:-8px;transform:translateY(-50%);cursor:e-resize;"></div>
+                </div>
+            </div>
+            <div style="color:rgba(255,255,255,0.6);font-size:14px;text-align:center;padding:10px 0;">📐 Drag to adjust crop area</div>
+            <div style="display:flex;gap:12px;">
+                <button class="btn-cancel" style="flex:1;margin:0;" onclick="closeCropper()">Cancel</button>
+                <button class="submit-btn secondary" style="flex:1;margin:0;" id="applyCropBtn">✅ Apply Crop</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // ============================================
+        // CONFIGURATION
+        // ============================================
+        const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbyYPKEOY6JHryc1l7R9iQoE6kBmLV7uk6doVLr5ENJEipJDeBIws09eM8mBHrequWhS/exec';
+
+        const APP = {
+            currentUser: null,
+            sessionToken: null,
+            currentTab: 'signin',
+            isOnline: navigator.onLine,
+            lastSyncTime: null,
+            currentApplication: null,
+            members: [],
+            uploadedMembers: [],
+            cropperData: null,
+            currentDocUpload: null
+        };
+
+        // ============================================
+        // INIT
+        // ============================================
+        document.addEventListener('DOMContentLoaded', function() {
+            const savedToken = localStorage.getItem('sessionToken');
+            const savedUser = localStorage.getItem('currentUser');
+
+            if (savedToken && savedUser) {
+                APP.sessionToken = savedToken;
+                APP.currentUser = JSON.parse(savedUser);
+                showDashboard();
+            }
+
+            window.addEventListener('online', function() {
+                APP.isOnline = true;
+                updateSyncStatus();
+            });
+
+            window.addEventListener('offline', function() {
+                APP.isOnline = false;
+                updateSyncStatus();
+            });
+
+            document.getElementById('signupContact').addEventListener('input', function(e) {
+                this.value = this.value.replace(/\D/g, '').slice(0, 10);
+            });
+            document.getElementById('signinMobile').addEventListener('input', function(e) {
+                this.value = this.value.replace(/\D/g, '').slice(0, 10);
+            });
+
+            // Cropper events
+            initCropper();
+            document.getElementById('applyCropBtn').addEventListener('click', applyCrop);
+        });
+
+        // ============================================
+        // SYNC STATUS
+        // ============================================
+        function updateSyncStatus() {
+            const indicator = document.getElementById('syncIndicator');
+            const timeEl = document.getElementById('syncTime');
+            const offlineBadge = document.getElementById('offlineBadge');
+
+            if (!APP.isOnline) {
+                indicator.textContent = '📡 Offline';
+                indicator.style.color = '#f6ad55';
+                offlineBadge.classList.remove('hidden');
+            } else {
+                indicator.textContent = '✅ Online';
+                indicator.style.color = '#68d391';
+                offlineBadge.classList.add('hidden');
+                if (APP.lastSyncTime) {
+                    timeEl.textContent = new Date(APP.lastSyncTime).toLocaleTimeString();
+                }
+            }
+        }
+
+        // ============================================
+        // TAB SWITCHING
+        // ============================================
+        function switchTab(tab) {
+            APP.currentTab = tab;
+            document.getElementById('signinTab').classList.toggle('active', tab === 'signin');
+            document.getElementById('signupTab').classList.toggle('active', tab === 'signup');
+            document.getElementById('signinForm').classList.toggle('hidden', tab !== 'signin');
+            document.getElementById('signupForm').classList.toggle('hidden', tab !== 'signup');
+            hideMessage();
+        }
+
+        function togglePassword(inputId) {
+            const input = document.getElementById(inputId);
+            const type = input.getAttribute('type') === 'password' ? 'text' : 'password';
+            input.setAttribute('type', type);
+        }
+
+        function showMessage(text, type = 'info') {
+            const msg = document.getElementById('message');
+            msg.textContent = text;
+            msg.className = `message ${type}`;
+            msg.style.display = 'block';
+            clearTimeout(msg._timeout);
+            msg._timeout = setTimeout(() => { msg.style.display = 'none'; }, 5000);
+        }
+
+        function hideMessage() {
+            document.getElementById('message').style.display = 'none';
+        }
+
+        function showLoading(btnId, textId, loadingText) {
+            document.getElementById(btnId).disabled = true;
+            document.getElementById(textId).innerHTML = `<span class="loading"></span> ${loadingText}`;
+        }
+
+        function hideLoading(btnId, textId, originalText) {
+            document.getElementById(btnId).disabled = false;
+            document.getElementById(textId).textContent = originalText;
+        }
+
+        // ============================================
+        // AUTH
+        // ============================================
+        async function handleSignUp(event) {
+            event.preventDefault();
+            showLoading('signupBtn', 'signupBtnText', 'Creating Account...');
+            hideMessage();
+
+            const name = document.getElementById('signupName').value.trim();
+            const contact = document.getElementById('signupContact').value.trim();
+            const password = document.getElementById('signupPassword').value;
+
+            if (!name || !contact || !password) {
+                showMessage('❌ Please fill in all required fields.', 'error');
+                hideLoading('signupBtn', 'signupBtnText', 'Create Account');
+                return;
+            }
+            if (contact.length !== 10) {
+                showMessage('❌ Please enter a valid 10-digit contact number.', 'error');
+                hideLoading('signupBtn', 'signupBtnText', 'Create Account');
+                return;
+            }
+            if (password.length < 6) {
+                showMessage('❌ Password must be at least 6 characters long.', 'error');
+                hideLoading('signupBtn', 'signupBtnText', 'Create Account');
+                return;
+            }
+
+            try {
+                const formData = new URLSearchParams({
+                    action: 'signup',
+                    name: name,
+                    contact: contact,
+                    password: password
+                });
+                const response = await fetch(SCRIPT_URL, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                    body: formData
+                });
+                const result = await response.json();
+                if (result.success) {
+                    showMessage('✅ Account created successfully! Your account is pending admin approval.', 'success');
+                    document.getElementById('signupFormElement').reset();
+                } else {
+                    showMessage('❌ ' + result.message, 'error');
+                }
+            } catch (error) {
+                showMessage('❌ Registration failed: ' + error.message, 'error');
+            }
+            hideLoading('signupBtn', 'signupBtnText', 'Create Account');
+        }
+
+        async function handleSignIn(event) {
+            event.preventDefault();
+            showLoading('signinBtn', 'signinBtnText', 'Signing In...');
+            hideMessage();
+
+            const mobile = document.getElementById('signinMobile').value.trim();
+            const password = document.getElementById('signinPassword').value;
+
+            if (!mobile || !password) {
+                showMessage('❌ Please enter mobile number and password.', 'error');
+                hideLoading('signinBtn', 'signinBtnText', 'Sign In');
+                return;
+            }
+
+            try {
+                const formData = new URLSearchParams({
+                    action: 'signin',
+                    contact: mobile,
+                    password: password
+                });
+                const response = await fetch(SCRIPT_URL, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                    body: formData
+                });
+                const result = await response.json();
+
+                if (!result.success) {
+                    if (result.status === 'pending') {
+                        showMessage('⏳ Your account is pending approval. Please wait for admin approval.', 'warning');
+                    } else if (result.status === 'rejected') {
+                        showMessage('❌ Your account has been rejected. Please contact administrator.', 'error');
+                    } else {
+                        showMessage('❌ ' + result.message, 'error');
+                    }
+                    hideLoading('signinBtn', 'signinBtnText', 'Sign In');
+                    return;
+                }
+
+                const userData = result.data;
+                APP.currentUser = {
+                    name: userData.name,
+                    contact: userData.contact,
+                    status: userData.status,
+                    slNo: userData.slNo
+                };
+                APP.sessionToken = userData.sessionToken;
+                localStorage.setItem('sessionToken', APP.sessionToken);
+                localStorage.setItem('currentUser', JSON.stringify(APP.currentUser));
+
+                showDashboard();
+                showMessage('✅ Welcome back, ' + userData.name + '!', 'success');
+            } catch (error) {
+                showMessage('❌ Login failed: ' + error.message, 'error');
+            }
+            hideLoading('signinBtn', 'signinBtnText', 'Sign In');
+        }
+
+        function showDashboard() {
+            document.getElementById('authSection').classList.add('hidden');
+            document.getElementById('dashboardSection').classList.remove('hidden');
+
+            if (APP.currentUser) {
+                const initial = APP.currentUser.name.charAt(0).toUpperCase();
+                document.getElementById('userAvatarCompact').textContent = initial;
+                document.getElementById('userNameCompact').textContent = APP.currentUser.name;
+                document.getElementById('userContactCompact').textContent = '📱 ' + APP.currentUser.contact;
+                document.getElementById('welcomeNameCompact').textContent = APP.currentUser.name;
+
+                const statusBadge = document.getElementById('userStatusBadgeCompact');
+                const status = APP.currentUser.status || 'Pending';
+                statusBadge.textContent = status;
+                statusBadge.className = 'user-status-compact ' + status.toLowerCase();
+            }
+
+            updateSyncStatus();
+            showSearch();
+        }
+
+        function handleSignOut() {
+            localStorage.removeItem('sessionToken');
+            localStorage.removeItem('currentUser');
+            APP.currentUser = null;
+            APP.sessionToken = null;
+            APP.currentApplication = null;
+            APP.members = [];
+            document.getElementById('dashboardSection').classList.add('hidden');
+            document.getElementById('authSection').classList.remove('hidden');
+            document.getElementById('signinFormElement').reset();
+            document.getElementById('signupFormElement').reset();
+            showMessage('👋 Signed out successfully!', 'info');
+        }
+
+        // ============================================
+        // SEARCH
+        // ============================================
+        function showSearch() {
+            document.getElementById('searchSection').classList.remove('hidden');
+            document.getElementById('memberSection').classList.add('hidden');
+            document.getElementById('searchInput').focus();
+        }
+
+        async function performSearch() {
+            const searchTerm = document.getElementById('searchInput').value.trim();
+            if (!searchTerm) {
+                showMessage('❌ Please enter a search term.', 'error');
+                return;
+            }
+
+            if (!APP.isOnline) {
+                showMessage('⚠️ You are offline. Please connect to the internet to search.', 'warning');
+                return;
+            }
+
+            const resultsDiv = document.getElementById('searchResults');
+            resultsDiv.innerHTML = '<div style="text-align:center;padding:20px;color:#a0aec0;"><span class="loading"></span> Searching...</div>';
+
+            try {
+                const formData = new URLSearchParams({
+                    action: 'search_data',
+                    searchTerm: searchTerm,
+                    sessionToken: APP.sessionToken
+                });
+
+                const response = await fetch(SCRIPT_URL, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                    body: formData
+                });
+
+                const result = await response.json();
+
+                if (!result.success) {
+                    resultsDiv.innerHTML = `
+                        <div class="no-results">
+                            <span class="icon">🔍</span>
+                            ${result.message || 'No results found'}
+                        </div>
+                    `;
+                    return;
+                }
+
+                if (result.data && result.data.length > 0) {
+                    let html = '';
+                    result.data.forEach(item => {
+                        html += `
+                            <div class="search-result-item" onclick="selectApplication('${item.applicationNo}')">
+                                <div class="result-app-no">📄 ${item.applicationNo}</div>
+                                <div class="result-hof">👤 ${item.headOfFamily}</div>
+                                <div class="result-mobile">📱 ${item.hofMobile}</div>
+                                <div class="result-members">👪 ${item.totalMembers} member${item.totalMembers > 1 ? 's' : ''} | 📍 ${item.cat || 'N/A'}</div>
+                            </div>
+                        `;
+                    });
+                    resultsDiv.innerHTML = html;
+                } else {
+                    resultsDiv.innerHTML = `
+                        <div class="no-results">
+                            <span class="icon">🔍</span>
+                            No matching records found
+                        </div>
+                    `;
+                }
+
+            } catch (error) {
+                resultsDiv.innerHTML = `
+                    <div class="no-results">
+                        <span class="icon">❌</span>
+                        Search failed: ${error.message}
+                    </div>
+                `;
+            }
+        }
+
+        // ============================================
+        // SELECT APPLICATION / MEMBERS
+        // ============================================
+        async function selectApplication(applicationNo) {
+            if (!APP.isOnline) {
+                showMessage('⚠️ You are offline. Please connect to the internet.', 'warning');
+                return;
+            }
+
+            document.getElementById('searchResults').innerHTML = '<div style="text-align:center;padding:20px;color:#a0aec0;"><span class="loading"></span> Loading members...</div>';
+
+            try {
+                const formData = new URLSearchParams({
+                    action: 'get_family_members',
+                    applicationNo: applicationNo,
+                    sessionToken: APP.sessionToken
+                });
+
+                const response = await fetch(SCRIPT_URL, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                    body: formData
+                });
+
+                const result = await response.json();
+
+                if (!result.success) {
+                    showMessage('❌ ' + (result.message || 'Failed to load members'), 'error');
+                    showSearch();
+                    return;
+                }
+
+                const data = result.data;
+                APP.currentApplication = data;
+                APP.members = data.members || [];
+
+                // Get uploaded members to pre-fill
+                await loadUploadedMembers(applicationNo);
+
+                renderMemberList();
+                document.getElementById('searchSection').classList.add('hidden');
+                document.getElementById('memberSection').classList.remove('hidden');
+                document.getElementById('memberAppTitle').textContent = '📄 Application: ' + data.applicationNo;
+                document.getElementById('memberHofInfo').textContent = '👤 Head: ' + data.headOfFamily + ' | 📱 ' + data.hofMobile;
+
+            } catch (error) {
+                showMessage('❌ Failed to load members: ' + error.message, 'error');
+                showSearch();
+            }
+        }
+
+        async function loadUploadedMembers(applicationNo) {
+            try {
+                const formData = new URLSearchParams({
+                    action: 'get_uploaded_members',
+                    applicationNo: applicationNo,
+                    sessionToken: APP.sessionToken
+                });
+
+                const response = await fetch(SCRIPT_URL, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                    body: formData
+                });
+
+                const result = await response.json();
+                if (result.success && result.data) {
+                    APP.uploadedMembers = result.data;
+                    // Merge with members
+                    APP.uploadedMembers.forEach(u => {
+                        const member = APP.members.find(m => m.memberId === u.memberId);
+                        if (member) {
+                            member.aadharFront = u.aadharFront || '';
+                            member.aadharBack = u.aadharBack || '';
+                            member.voterFront = u.voterFront || '';
+                            member.voterBack = u.voterBack || '';
+                            member.voterSlip = u.voterSlip || '';
+                            member.isUploaded = true;
+                            member.memberName = u.memberName || member.memberName;
+                        }
+                    });
+                }
+            } catch (error) {
+                console.log('Load uploaded members error:', error);
+            }
+        }
+
+        // ============================================
+        // RENDER MEMBER LIST
+        // ============================================
+        function renderMemberList() {
+            const container = document.getElementById('memberList');
+            let html = '';
+
+            APP.members.forEach((member, index) => {
+                const isHead = member.isHead;
+                const isUploaded = member.isUploaded;
+                const memberId = member.memberId;
+
+                html += `
+                    <div class="member-card ${isUploaded ? 'uploaded' : ''}" id="memberCard_${memberId}">
+                        <div class="member-card-header">
+                            <span class="member-title">${isHead ? '👤 Head' : '👤 Member ' + member.memberIndex}</span>
+                            <span>
+                                <span class="member-badge ${isHead ? 'head' : 'member'}">${isHead ? 'HEAD' : 'MEMBER'}</span>
+                                ${isUploaded ? '<span class="member-badge uploaded">✅ Uploaded</span>' : ''}
+                            </span>
+                        </div>
+                        <div class="member-id-display">🆔 ${memberId}</div>
+
+                        <div class="form-group">
+                            <label>Member Name <span class="required">*</span></label>
+                            <input type="text" id="memberName_${memberId}" value="${member.memberName || ''}" placeholder="Enter member name" required>
+                        </div>
+
+                        <div class="member-doc-row">
+                            <div class="member-doc-item">
+                                <span class="doc-label">🪪 Aadhar Front</span>
+                                <div class="doc-upload-area ${member.aadharFront ? 'has-doc' : ''}" id="docArea_aadharFront_${memberId}" onclick="document.getElementById('docInput_aadharFront_${memberId}').click()">
+                                    ${member.aadharFront ? `<img class="doc-preview" src="${member.aadharFront}" alt="Aadhar Front">` : `<span class="doc-icon">📷</span><span class="doc-label-text">Tap to upload</span>`}
+                                    <button class="remove-doc-btn" onclick="event.stopPropagation();removeDoc('${memberId}','aadharFront')">✕</button>
+                                    <input type="file" id="docInput_aadharFront_${memberId}" accept="image/*" onchange="handleDocUpload(event,'${memberId}','aadharFront')">
+                                </div>
+                                <input type="hidden" id="doc_aadharFront_${memberId}" value="${member.aadharFront || ''}">
+                            </div>
+                            <div class="member-doc-item">
+                                <span class="doc-label">🪪 Aadhar Back</span>
+                                <div class="doc-upload-area ${member.aadharBack ? 'has-doc' : ''}" id="docArea_aadharBack_${memberId}" onclick="document.getElementById('docInput_aadharBack_${memberId}').click()">
+                                    ${member.aadharBack ? `<img class="doc-preview" src="${member.aadharBack}" alt="Aadhar Back">` : `<span class="doc-icon">📷</span><span class="doc-label-text">Tap to upload</span>`}
+                                    <button class="remove-doc-btn" onclick="event.stopPropagation();removeDoc('${memberId}','aadharBack')">✕</button>
+                                    <input type="file" id="docInput_aadharBack_${memberId}" accept="image/*" onchange="handleDocUpload(event,'${memberId}','aadharBack')">
+                                </div>
+                                <input type="hidden" id="doc_aadharBack_${memberId}" value="${member.aadharBack || ''}">
+                            </div>
+                        </div>
+
+                        <div class="member-doc-row">
+                            <div class="member-doc-item">
+                                <span class="doc-label">🗳️ Voter Front</span>
+                                <div class="doc-upload-area ${member.voterFront ? 'has-doc' : ''}" id="docArea_voterFront_${memberId}" onclick="document.getElementById('docInput_voterFront_${memberId}').click()">
+                                    ${member.voterFront ? `<img class="doc-preview" src="${member.voterFront}" alt="Voter Front">` : `<span class="doc-icon">📷</span><span class="doc-label-text">Tap to upload</span>`}
+                                    <button class="remove-doc-btn" onclick="event.stopPropagation();removeDoc('${memberId}','voterFront')">✕</button>
+                                    <input type="file" id="docInput_voterFront_${memberId}" accept="image/*" onchange="handleDocUpload(event,'${memberId}','voterFront')">
+                                </div>
+                                <input type="hidden" id="doc_voterFront_${memberId}" value="${member.voterFront || ''}">
+                            </div>
+                            <div class="member-doc-item">
+                                <span class="doc-label">🗳️ Voter Back</span>
+                                <div class="doc-upload-area ${member.voterBack ? 'has-doc' : ''}" id="docArea_voterBack_${memberId}" onclick="document.getElementById('docInput_voterBack_${memberId}').click()">
+                                    ${member.voterBack ? `<img class="doc-preview" src="${member.voterBack}" alt="Voter Back">` : `<span class="doc-icon">📷</span><span class="doc-label-text">Tap to upload</span>`}
+                                    <button class="remove-doc-btn" onclick="event.stopPropagation();removeDoc('${memberId}','voterBack')">✕</button>
+                                    <input type="file" id="docInput_voterBack_${memberId}" accept="image/*" onchange="handleDocUpload(event,'${memberId}','voterBack')">
+                                </div>
+                                <input type="hidden" id="doc_voterBack_${memberId}" value="${member.voterBack || ''}">
+                            </div>
+                        </div>
+
+                        <div class="member-doc-row">
+                            <div class="member-doc-item" style="grid-column:1/2;">
+                                <span class="doc-label">📄 Voter Slip</span>
+                                <div class="doc-upload-area ${member.voterSlip ? 'has-doc' : ''}" id="docArea_voterSlip_${memberId}" onclick="document.getElementById('docInput_voterSlip_${memberId}').click()">
+                                    ${member.voterSlip ? `<img class="doc-preview" src="${member.voterSlip}" alt="Voter Slip">` : `<span class="doc-icon">📷</span><span class="doc-label-text">Tap to upload</span>`}
+                                    <button class="remove-doc-btn" onclick="event.stopPropagation();removeDoc('${memberId}','voterSlip')">✕</button>
+                                    <input type="file" id="docInput_voterSlip_${memberId}" accept="image/*" onchange="handleDocUpload(event,'${memberId}','voterSlip')">
+                                </div>
+                                <input type="hidden" id="doc_voterSlip_${memberId}" value="${member.voterSlip || ''}">
+                            </div>
+                        </div>
+                    </div>
+                `;
+            });
+
+            container.innerHTML = html;
+            document.getElementById('saveAllBtn').classList.remove('hidden');
+        }
+
+        // ============================================
+        // DOCUMENT UPLOAD
+        // ============================================
+        let currentDocData = null;
+        let currentDocMemberId = null;
+        let currentDocField = null;
+
+        function handleDocUpload(event, memberId, field) {
+            const file = event.target.files[0];
+            if (!file) return;
+            if (!file.type.startsWith('image/')) {
+                showMessage('❌ Please select an image file.', 'error');
+                return;
+            }
+
+            currentDocMemberId = memberId;
+            currentDocField = field;
+            currentDocData = file;
+
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                openCropperForDoc(e.target.result);
+            };
+            reader.readAsDataURL(file);
+            event.target.value = '';
+        }
+
+        function openCropperForDoc(imageDataURL) {
+            const img = document.getElementById('cropperImage');
+            img.src = imageDataURL;
+            img.onload = function() {
+                const wrapper = document.getElementById('cropperWrapper');
+                const box = document.getElementById('cropBox');
+                const imgRect = img.getBoundingClientRect();
+                const cropSize = Math.min(imgRect.width, imgRect.height) * 0.7;
+                const cropX = (imgRect.width - cropSize) / 2;
+                const cropY = (imgRect.height - cropSize) / 2;
+                const widthPercent = (cropSize / imgRect.width) * 100;
+                const heightPercent = (cropSize / imgRect.height) * 100;
+                const leftPercent = (cropX / imgRect.width) * 100;
+                const topPercent = (cropY / imgRect.height) * 100;
+                box.style.left = leftPercent + '%';
+                box.style.top = topPercent + '%';
+                box.style.width = widthPercent + '%';
+                box.style.height = heightPercent + '%';
+                box.dataset.imgWidth = imgRect.width;
+                box.dataset.imgHeight = imgRect.height;
+                APP.cropperData = {
+                    imageData: imageDataURL,
+                    memberId: currentDocMemberId,
+                    field: currentDocField,
+                    file: currentDocData
+                };
+            };
+            document.getElementById('cropperModal').classList.add('show');
+        }
+
+        function closeCropper() {
+            document.getElementById('cropperModal').classList.remove('show');
+            APP.cropperData = null;
+            currentDocData = null;
+        }
+
+        async function applyCrop() {
+            if (!APP.cropperData) return;
+
+            const img = document.getElementById('cropperImage');
+            const box = document.getElementById('cropBox');
+
+            const left = parseFloat(box.style.left) || 0;
+            const top = parseFloat(box.style.top) || 0;
+            const width = parseFloat(box.style.width) || 30;
+            const height = parseFloat(box.style.height) || 30;
+
+            const canvas = document.createElement('canvas');
+            const ctx = canvas.getContext('2d');
+
+            // Load image and crop
+            const cropImg = new Image();
+            cropImg.src = APP.cropperData.imageData;
+
+            await new Promise((resolve) => {
+                cropImg.onload = function() {
+                    const imgWidth = cropImg.width;
+                    const imgHeight = cropImg.height;
+                    const cropX = (left / 100) * imgWidth;
+                    const cropY = (top / 100) * imgHeight;
+                    const cropWidth = (width / 100) * imgWidth;
+                    const cropHeight = (height / 100) * imgHeight;
+
+                    canvas.width = cropWidth;
+                    canvas.height = cropHeight;
+                    ctx.drawImage(cropImg, cropX, cropY, cropWidth, cropHeight, 0, 0, cropWidth, cropHeight);
+                    resolve();
+                };
+            });
+
+            const croppedDataURL = canvas.toDataURL('image/jpeg', 0.85);
+
+            // Upload the cropped image
+            const base64Data = croppedDataURL.split(',')[1];
+            const memberId = APP.cropperData.memberId;
+            const field = APP.cropperData.field;
+
+            try {
+                const formData = new URLSearchParams({
+                    action: 'upload_photo',
+                    fileName: `${memberId}_${field}_${Date.now()}.jpg`,
+                    fileData: base64Data,
+                    fileType: 'image/jpeg',
+                    applicationNo: APP.currentApplication.applicationNo,
+                    memberId: memberId,
+                    documentType: field,
+                    sessionToken: APP.sessionToken
+                });
+
+                const response = await fetch(SCRIPT_URL, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                    body: formData
+                });
+
+                const result = await response.json();
+
+                if (result.success) {
+                    // Update the hidden input and preview
+                    document.getElementById(`doc_${field}_${memberId}`).value = result.fileUrl;
+                    const area = document.getElementById(`docArea_${field}_${memberId}`);
+                    area.classList.add('has-doc');
+                    area.innerHTML = `
+                        <img class="doc-preview" src="${result.fileUrl}" alt="${field}">
+                        <button class="remove-doc-btn" onclick="event.stopPropagation();removeDoc('${memberId}','${field}')">✕</button>
+                        <input type="file" id="docInput_${field}_${memberId}" accept="image/*" onchange="handleDocUpload(event,'${memberId}','${field}')">
+                    `;
+
+                    // Update member data
+                    const member = APP.members.find(m => m.memberId === memberId);
+                    if (member) {
+                        member[field] = result.fileUrl;
+                        member.isUploaded = true;
+                    }
+
+                    showMessage('✅ Document uploaded successfully!', 'success');
+                    setTimeout(() => hideMessage(), 2000);
+
+                    // Update card status
+                    const card = document.getElementById(`memberCard_${memberId}`);
+                    if (card) card.classList.add('uploaded');
+                } else {
+                    showMessage('❌ Upload failed: ' + (result.error || result.message), 'error');
+                }
+            } catch (error) {
+                showMessage('❌ Upload failed: ' + error.message, 'error');
+            }
+
+            closeCropper();
+        }
+
+        function removeDoc(memberId, field) {
+            document.getElementById(`doc_${field}_${memberId}`).value = '';
+            const area = document.getElementById(`docArea_${field}_${memberId}`);
+            area.classList.remove('has-doc');
+            area.innerHTML = `
+                <span class="doc-icon">📷</span>
+                <span class="doc-label-text">Tap to upload</span>
+                <input type="file" id="docInput_${field}_${memberId}" accept="image/*" onchange="handleDocUpload(event,'${memberId}','${field}')">
+            `;
+
+            // Update member data
+            const member = APP.members.find(m => m.memberId === memberId);
+            if (member) {
+                member[field] = '';
+                // Check if any docs remain
+                const hasDocs = member.aadharFront || member.aadharBack || member.voterFront || member.voterBack || member.voterSlip;
+                if (!hasDocs) {
+                    member.isUploaded = false;
+                    const card = document.getElementById(`memberCard_${memberId}`);
+                    if (card) card.classList.remove('uploaded');
+                }
+            }
+
+            showMessage('🗑️ Document removed', 'info');
+            setTimeout(() => hideMessage(), 1500);
+        }
+
+        // ============================================
+        // CROPPER INTERACTIONS
+        // ============================================
+        let isDragging = false;
+        let isResizing = false;
+        let resizeHandle = '';
+        let cropStartX = 0;
+        let cropStartY = 0;
+
+        function initCropper() {
+            const wrapper = document.getElementById('cropperWrapper');
+            const box = document.getElementById('cropBox');
+
+            box.addEventListener('mousedown', onCropMouseDown);
+            box.addEventListener('touchstart', onCropTouchStart, { passive: false });
+
+            wrapper.addEventListener('touchmove', function(e) {
+                if (document.getElementById('cropperModal').classList.contains('show')) {
+                    e.preventDefault();
+                }
+            }, { passive: false });
+        }
+
+        function onCropMouseDown(e) {
+            e.preventDefault();
+            const target = e.target;
+            if (target.classList.contains('crop-handle')) {
+                isResizing = true;
+                resizeHandle = target.className.split(' ')[1];
+            } else {
+                isDragging = true;
+            }
+            const rect = document.getElementById('cropperWrapper').getBoundingClientRect();
+            cropStartX = e.clientX - rect.left;
+            cropStartY = e.clientY - rect.top;
+            document.addEventListener('mousemove', onCropMouseMove);
+            document.addEventListener('mouseup', onCropMouseUp);
+        }
+
+        function onCropMouseMove(e) {
+            e.preventDefault();
+            const rect = document.getElementById('cropperWrapper').getBoundingClientRect();
+            const mouseX = e.clientX - rect.left;
+            const mouseY = e.clientY - rect.top;
+
+            if (isDragging) {
+                moveCropBox(mouseX - cropStartX, mouseY - cropStartY);
+                cropStartX = mouseX;
+                cropStartY = mouseY;
+            } else if (isResizing) {
+                resizeCropBox(mouseX, mouseY, resizeHandle);
+            }
+        }
+
+        function onCropMouseUp() {
+            isDragging = false;
+            isResizing = false;
+            document.removeEventListener('mousemove', onCropMouseMove);
+            document.removeEventListener('mouseup', onCropMouseUp);
+        }
+
+        function onCropTouchStart(e) {
+            e.preventDefault();
+            const touch = e.touches[0];
+            const target = e.target;
+            if (target.classList.contains('crop-handle')) {
+                isResizing = true;
+                resizeHandle = target.className.split(' ')[1];
+            } else {
+                isDragging = true;
+            }
+            const rect = document.getElementById('cropperWrapper').getBoundingClientRect();
+            cropStartX = touch.clientX - rect.left;
+            cropStartY = touch.clientY - rect.top;
+            document.addEventListener('touchmove', onCropTouchMove, { passive: false });
+            document.addEventListener('touchend', onCropTouchEnd, { passive: false });
+        }
+
+        function onCropTouchMove(e) {
+            e.preventDefault();
+            const touch = e.touches[0];
+            const rect = document.getElementById('cropperWrapper').getBoundingClientRect();
+            const touchX = touch.clientX - rect.left;
+            const touchY = touch.clientY - rect.top;
+
+            if (isDragging) {
+                moveCropBox(touchX - cropStartX, touchY - cropStartY);
+                cropStartX = touchX;
+                cropStartY = touchY;
+            } else if (isResizing) {
+                resizeCropBox(touchX, touchY, resizeHandle);
+            }
+        }
+
+        function onCropTouchEnd() {
+            isDragging = false;
+            isResizing = false;
+            document.removeEventListener('touchmove', onCropTouchMove);
+            document.removeEventListener('touchend', onCropTouchEnd);
+        }
+
+        function moveCropBox(deltaX, deltaY) {
+            const img = document.getElementById('cropperImage');
+            const imgRect = img.getBoundingClientRect();
+            const box = document.getElementById('cropBox');
+
+            let left = parseFloat(box.style.left) || 0;
+            let top = parseFloat(box.style.top) || 0;
+            let width = parseFloat(box.style.width) || 30;
+            let height = parseFloat(box.style.height) || 30;
+
+            const deltaXPercent = (deltaX / imgRect.width) * 100;
+            const deltaYPercent = (deltaY / imgRect.height) * 100;
+
+            let newLeft = left + deltaXPercent;
+            let newTop = top + deltaYPercent;
+
+            newLeft = Math.max(0, Math.min(newLeft, 100 - width));
+            newTop = Math.max(0, Math.min(newTop, 100 - height));
+
+            box.style.left = newLeft + '%';
+            box.style.top = newTop + '%';
+        }
+
+        function resizeCropBox(mouseX, mouseY, handle) {
+            const img = document.getElementById('cropperImage');
+            const imgRect = img.getBoundingClientRect();
+            const box = document.getElementById('cropBox');
+
+            let left = parseFloat(box.style.left) || 0;
+            let top = parseFloat(box.style.top) || 0;
+            let width = parseFloat(box.style.width) || 30;
+            let height = parseFloat(box.style.height) || 30;
+
+            const mouseXPercent = (mouseX / imgRect.width) * 100;
+            const mouseYPercent = (mouseY / imgRect.height) * 100;
+            const minSize = 5;
+
+            if (handle.includes('e')) {
+                let newWidth = mouseXPercent - left;
+                newWidth = Math.max(minSize, Math.min(newWidth, 100 - left));
+                width = newWidth;
+            }
+            if (handle.includes('w')) {
+                let newLeft = mouseXPercent;
+                let newWidth = left + width - newLeft;
+                if (newWidth >= minSize && newLeft >= 0) {
+                    left = newLeft;
+                    width = newWidth;
+                }
+            }
+            if (handle.includes('s')) {
+                let newHeight = mouseYPercent - top;
+                newHeight = Math.max(minSize, Math.min(newHeight, 100 - top));
+                height = newHeight;
+            }
+            if (handle.includes('n')) {
+                let newTop = mouseYPercent;
+                let newHeight = top + height - newTop;
+                if (newHeight >= minSize && newTop >= 0) {
+                    top = newTop;
+                    height = newHeight;
+                }
+            }
+
+            box.style.left = left + '%';
+            box.style.top = top + '%';
+            box.style.width = width + '%';
+            box.style.height = height + '%';
+        }
+
+        // ============================================
+        // SAVE ALL MEMBERS
+        // ============================================
+        async function saveAllMembers() {
+            const btn = document.getElementById('saveAllBtn');
+            const btnText = document.getElementById('saveAllBtnText');
+            showLoading('saveAllBtn', 'saveAllBtnText', 'Saving...');
+
+            // Collect all member data
+            const membersData = [];
+            let hasError = false;
+
+            APP.members.forEach(member => {
+                const memberId = member.memberId;
+                const name = document.getElementById(`memberName_${memberId}`).value.trim();
+                if (!name) {
+                    hasError = true;
+                    showMessage(`❌ Please enter name for ${member.isHead ? 'Head' : 'Member ' + member.memberIndex}`, 'error');
+                    return;
+                }
+
+                const data = {
+                    applicationNo: APP.currentApplication.applicationNo,
+                    headOfFamily: APP.currentApplication.headOfFamily,
+                    hofMobile: APP.currentApplication.hofMobile,
+                    memberId: memberId,
+                    memberName: name,
+                    aadharFront: document.getElementById(`doc_aadharFront_${memberId}`).value || '',
+                    aadharBack: document.getElementById(`doc_aadharBack_${memberId}`).value || '',
+                    voterFront: document.getElementById(`doc_voterFront_${memberId}`).value || '',
+                    voterBack: document.getElementById(`doc_voterBack_${memberId}`).value || '',
+                    voterSlip: document.getElementById(`doc_voterSlip_${memberId}`).value || ''
+                };
+                membersData.push(data);
+            });
+
+            if (hasError) {
+                hideLoading('saveAllBtn', 'saveAllBtnText', 'Save All Members');
+                return;
+            }
+
+            if (!APP.isOnline) {
+                // Save locally for offline sync
+                try {
+                    const pending = JSON.parse(localStorage.getItem('pendingMembers') || '[]');
+                    membersData.forEach(m => {
+                        const existing = pending.find(p => p.memberId === m.memberId);
+                        if (!existing) {
+                            pending.push({ ...m, _timestamp: Date.now() });
+                        } else {
+                            Object.assign(existing, m);
+                        }
+                    });
+                    localStorage.setItem('pendingMembers', JSON.stringify(pending));
+                    showMessage('💾 Saved offline. Will sync when online.', 'warning');
+                    setTimeout(() => hideMessage(), 3000);
+                } catch(e) {
+                    showMessage('❌ Failed to save offline: ' + e.message, 'error');
+                }
+                hideLoading('saveAllBtn', 'saveAllBtnText', 'Save All Members');
+                return;
+            }
+
+            try {
+                const formData = new URLSearchParams({
+                    action: 'save_all_members',
+                    membersData: JSON.stringify(membersData),
+                    sessionToken: APP.sessionToken
+                });
+
+                const response = await fetch(SCRIPT_URL, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                    body: formData
+                });
+
+                const result = await response.json();
+
+                if (result.success) {
+                    showMessage(`✅ ${result.message}`, 'success');
+                    setTimeout(() => hideMessage(), 3000);
+                    // Mark all as uploaded
+                    APP.members.forEach(m => {
+                        m.isUploaded = true;
+                        const card = document.getElementById(`memberCard_${m.memberId}`);
+                        if (card) card.classList.add('uploaded');
+                    });
+                    // Update badges
+                    document.querySelectorAll('.member-badge.uploaded').forEach(el => el.remove());
+                    document.querySelectorAll('.member-card').forEach(card => {
+                        const header = card.querySelector('.member-card-header');
+                        if (header) {
+                            const badge = document.createElement('span');
+                            badge.className = 'member-badge uploaded';
+                            badge.textContent = '✅ Uploaded';
+                            header.querySelector('span:last-child').appendChild(badge);
+                        }
+                    });
+                    // Clear pending
+                    localStorage.removeItem('pendingMembers');
+                } else {
+                    showMessage('❌ ' + (result.message || 'Save failed'), 'error');
+                }
+            } catch (error) {
+                // Save offline on error
+                try {
+                    const pending = JSON.parse(localStorage.getItem('pendingMembers') || '[]');
+                    membersData.forEach(m => {
+                        const existing = pending.find(p => p.memberId === m.memberId);
+                        if (!existing) {
+                            pending.push({ ...m, _timestamp: Date.now() });
+                        } else {
+                            Object.assign(existing, m);
+                        }
+                    });
+                    localStorage.setItem('pendingMembers', JSON.stringify(pending));
+                    showMessage('⚠️ Network error. Data saved offline.', 'warning');
+                    setTimeout(() => hideMessage(), 3000);
+                } catch(e) {
+                    showMessage('❌ Failed to save: ' + error.message, 'error');
+                }
+            }
+
+            hideLoading('saveAllBtn', 'saveAllBtnText', 'Save All Members');
+        }
+
+        // ============================================
+        // VIEW UPLOADED MEMBERS
+        // ============================================
+        function showUploadedMembers() {
+            const pending = JSON.parse(localStorage.getItem('pendingMembers') || '[]');
+            if (pending.length === 0) {
+                showMessage('📊 No pending/uploaded members found.', 'info');
+                return;
+            }
+
+            let msg = '📊 Pending Uploads: ' + pending.length + '\n\n';
+            pending.forEach((m, i) => {
+                msg += `${i+1}. ${m.memberName} (${m.memberId})\n`;
+                msg += `   📄 ${m.applicationNo}\n`;
+            });
+            msg += '\n💡 These will sync when you go online and save.';
+            showMessage(msg, 'info');
+        }
+
+        // ============================================
+        // BACK TO SEARCH
+        // ============================================
+        function backToSearch() {
+            document.getElementById('memberSection').classList.add('hidden');
+            document.getElementById('searchSection').classList.remove('hidden');
+            APP.currentApplication = null;
+            APP.members = [];
+            document.getElementById('searchInput').focus();
+        }
+
+        // ============================================
+        // CHANGE PASSWORD
+        // ============================================
+        function showChangePassword() {
+            document.getElementById('passwordModal').classList.add('show');
+            document.getElementById('currentPassword').value = '';
+            document.getElementById('newPassword').value = '';
+            document.getElementById('confirmPassword').value = '';
+            hideMessage();
+        }
+
+        function closePasswordModal() {
+            document.getElementById('passwordModal').classList.remove('show');
+        }
+
+        async function handleChangePassword(event) {
+            event.preventDefault();
+            showLoading('changePwdBtn', 'changePwdBtnText', 'Updating...');
+            hideMessage();
+
+            const currentPassword = document.getElementById('currentPassword').value;
+            const newPassword = document.getElementById('newPassword').value;
+            const confirmPassword = document.getElementById('confirmPassword').value;
+
+            if (newPassword !== confirmPassword) {
+                showMessage('❌ New passwords do not match.', 'error');
+                hideLoading('changePwdBtn', 'changePwdBtnText', 'Update Password');
+                return;
+            }
+            if (newPassword.length < 6) {
+                showMessage('❌ Password must be at least 6 characters.', 'error');
+                hideLoading('changePwdBtn', 'changePwdBtnText', 'Update Password');
+                return;
+            }
+
+            try {
+                const formData = new URLSearchParams({
+                    action: 'change_password',
+                    contact: APP.currentUser.contact,
+                    oldPassword: currentPassword,
+                    newPassword: newPassword
+                });
+
+                const response = await fetch(SCRIPT_URL, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                    body: formData
+                });
+
+                const result = await response.json();
+                if (result.success) {
+                    showMessage('✅ Password changed successfully!', 'success');
+                    closePasswordModal();
+                } else {
+                    showMessage('❌ ' + result.message, 'error');
+                }
+            } catch (error) {
+                showMessage('❌ Password change failed: ' + error.message, 'error');
+            }
+            hideLoading('changePwdBtn', 'changePwdBtnText', 'Update Password');
+        }
+
+        // ============================================
+        // HELP
+        // ============================================
+        function showHelp() {
+            showMessage(
+                '❓ Help & Support\n\n' +
+                '📌 Search by Application No, Head of Family, or Mobile\n' +
+                '📌 Click on a search result to view family members\n' +
+                '📌 Each member has fields for Aadhar & Voter documents\n' +
+                '📌 Tap document area → Crop photo → Upload\n' +
+                '📌 Enter member names and save all at once\n' +
+                '📌 Green border = Document uploaded\n' +
+                '📌 Works offline - data saved locally, syncs when online',
+                'info'
+            );
+        }
+
+        // ============================================
+        // MODAL HANDLERS
+        // ============================================
+        document.getElementById('passwordModal').addEventListener('click', function(e) {
+            if (e.target === this) closePasswordModal();
+        });
+
+        document.getElementById('cropperModal').addEventListener('click', function(e) {
+            if (e.target === this) closeCropper();
+        });
+
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') {
+                if (document.getElementById('cropperModal').classList.contains('show')) {
+                    closeCropper();
+                }
+                if (document.getElementById('passwordModal').classList.contains('show')) {
+                    closePasswordModal();
+                }
+            }
+            if (e.key === 'Enter' && document.getElementById('searchSection').classList.contains('hidden') === false) {
+                performSearch();
+            }
+        });
+
+        // Periodic sync check
+        setInterval(() => {
+            if (APP.isOnline && APP.sessionToken) {
+                // Check for pending members and sync
+                const pending = JSON.parse(localStorage.getItem('pendingMembers') || '[]');
+                if (pending.length > 0 && APP.currentApplication) {
+                    // Auto-sync if we're viewing the same application
+                    const currentApp = APP.currentApplication;
+                    const matching = pending.filter(m => m.applicationNo === currentApp.applicationNo);
+                    if (matching.length > 0 && !document.getElementById('saveAllBtn').disabled) {
+                        saveAllMembers();
+                    }
+                }
+            }
+            updateSyncStatus();
+        }, 30000);
+    </script>
+</body>
+</html>
