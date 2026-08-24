@@ -286,13 +286,42 @@
             animation: pulse 1s ease-in-out infinite;
         }
 
-        .cache-badge {
+        .cached-badge {
             font-size: 10px;
             padding: 2px 10px;
             border-radius: 8px;
             background: rgba(99, 179, 237, 0.15);
             color: #63b3ed;
             border: 1px solid rgba(99, 179, 237, 0.2);
+        }
+
+        .background-sync {
+            font-size: 11px;
+            color: #68d391;
+            font-weight: 600;
+        }
+
+        .sync-progress-bar {
+            width: 100%;
+            height: 3px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 4px;
+            margin-top: 4px;
+            overflow: hidden;
+            display: none;
+        }
+
+        .sync-progress-bar .bar {
+            height: 100%;
+            background: linear-gradient(90deg, #63b3ed, #b794f4);
+            width: 0%;
+            transition: width 0.3s ease;
+            border-radius: 4px;
+        }
+
+        .version-info {
+            font-size: 10px;
+            color: rgba(255, 255, 255, 0.4);
         }
 
         @keyframes pulse {
@@ -681,7 +710,7 @@
 
         .search-results {
             margin-top: 12px;
-            max-height: 300px;
+            max-height: 400px;
             overflow-y: auto;
         }
 
@@ -726,12 +755,6 @@
         .search-result-item .result-members {
             font-size: 12px;
             color: #b794f4;
-            margin-top: 2px;
-        }
-
-        .search-result-item .result-cached {
-            font-size: 10px;
-            color: #63b3ed;
             margin-top: 2px;
         }
 
@@ -835,6 +858,7 @@
             align-items: center;
             gap: 6px;
         }
+
         .member-doc-item .doc-label .tick { color: #48bb78; }
         .member-doc-item .doc-label .warn { color: #f6ad55; }
 
@@ -862,10 +886,12 @@
         .member-doc-item .doc-upload-area .doc-icon {
             font-size: 28px;
         }
+
         .member-doc-item .doc-upload-area .doc-label-text {
             font-size: 12px;
             color: rgba(255, 255, 255, 0.4);
         }
+
         .member-doc-item .doc-upload-area .doc-preview {
             max-width: 100%;
             max-height: 70px;
@@ -1019,12 +1045,19 @@
             overflow: hidden;
             display: none;
         }
+
         .upload-progress .bar {
             width: 0%;
             height: 100%;
             background: linear-gradient(90deg, #48bb78, #68d391);
             border-radius: 10px;
             transition: width 0.3s ease;
+        }
+
+        #searchStats {
+            font-size: 12px;
+            color: rgba(255, 255, 255, 0.4);
+            margin-top: 4px;
         }
 
         @media (max-width: 480px) {
@@ -1049,9 +1082,11 @@
             .modal { max-width: 95%; padding: 18px; }
             .modal-header h3 { font-size: 18px; }
         }
+
         @media (min-width: 481px) and (max-width: 768px) {
             .form-row { grid-template-columns: 1fr 1fr; }
         }
+
         ::-webkit-scrollbar { width: 6px; }
         ::-webkit-scrollbar-track { background: rgba(255, 255, 255, 0.02); border-radius: 10px; }
         ::-webkit-scrollbar-thumb { background: rgba(255, 255, 255, 0.1); border-radius: 10px; }
@@ -1063,7 +1098,7 @@
     <!-- AUTH -->
     <div id="authSection">
         <div class="header">
-            <h1>🏛️ 🌾 অন্নপূর্ণা যোজনা</h1>
+            <h1> 🌾 অন্নপূর্ণা যোজনা</h1>
             <p>Bhagabanpur Gram Panchayat</p>
             <span style="color:yellow">Arbara-Chanchal-Malda</span>
         </div>
@@ -1137,10 +1172,13 @@
             <div class="sync-status">
                 <span id="syncIndicator">🔄 Syncing...</span>
                 <span id="syncTime"></span>
-                <span id="cacheIndicator" class="cache-badge hidden">📦 Cached</span>
+                <span id="cacheIndicator" class="cached-badge hidden">📦 Cached</span>
                 <span id="offlineBadge" class="hidden" style="color:#f6ad55;font-weight:700;">📡 OFFLINE</span>
                 <span id="syncUserBadge" style="color:#68d391;font-weight:600;font-size:11px;"></span>
+                <span id="versionInfo" class="version-info hidden"></span>
+                <span id="backgroundSync" class="background-sync hidden">🔄 Background sync...</span>
             </div>
+            <div class="sync-progress-bar" id="syncProgressBar"><div class="bar" id="syncProgressBarInner"></div></div>
         </div>
         <div class="quick-actions-compact">
             <div class="quick-action-btn-compact primary-action" onclick="showSearch()">
@@ -1170,6 +1208,7 @@
                     <button class="submit-btn" style="width:auto;padding:12px 20px;margin:0;" onclick="performSearch()">Search</button>
                 </div>
                 <div class="hint-text">Application No, Head of Family, or HOF Mobile</div>
+                <div id="searchStats"></div>
             </div>
             <div id="searchResults" class="search-results"></div>
         </div>
@@ -1233,39 +1272,11 @@
     </div>
 </div>
 
-<!-- Cropper Modal (hidden, kept for compatibility) -->
-<div class="modal-overlay" id="cropperModal" style="display:none !important;">
-    <div class="modal" style="max-width:480px;">
-        <div class="modal-header">
-            <h3>✂️ Crop Photo</h3>
-            <button class="modal-close" onclick="closeCropper()">✕</button>
-        </div>
-        <div style="position:relative;overflow:hidden;border-radius:12px;background:rgba(0,0,0,0.3);touch-action:none;user-select:none;-webkit-user-select:none;" id="cropperWrapper">
-            <img id="cropperImage" src="" alt="Crop" style="display:block;width:100%;height:auto;pointer-events:none;">
-            <div id="cropBox" style="position:absolute;border:2px solid #48bb78;box-shadow:0 0 0 9999px rgba(0,0,0,0.6);cursor:move;touch-action:none;user-select:none;-webkit-user-select:none;">
-                <div class="crop-handle" style="top:-8px;left:-8px;cursor:nw-resize;"></div>
-                <div class="crop-handle" style="top:-8px;right:-8px;cursor:ne-resize;"></div>
-                <div class="crop-handle" style="bottom:-8px;left:-8px;cursor:sw-resize;"></div>
-                <div class="crop-handle" style="bottom:-8px;right:-8px;cursor:se-resize;"></div>
-                <div class="crop-handle" style="top:-8px;left:50%;transform:translateX(-50%);cursor:n-resize;"></div>
-                <div class="crop-handle" style="bottom:-8px;left:50%;transform:translateX(-50%);cursor:s-resize;"></div>
-                <div class="crop-handle" style="top:50%;left:-8px;transform:translateY(-50%);cursor:w-resize;"></div>
-                <div class="crop-handle" style="top:50%;right:-8px;transform:translateY(-50%);cursor:e-resize;"></div>
-            </div>
-        </div>
-        <div style="color:rgba(255,255,255,0.6);font-size:14px;text-align:center;padding:10px 0;">📐 Drag to adjust crop</div>
-        <div style="display:flex;gap:12px;">
-            <button class="btn-cancel" style="flex:1;margin:0;" onclick="closeCropper()">Cancel</button>
-            <button class="submit-btn secondary" style="flex:1;margin:0;" id="applyCropBtn">✅ Apply Crop</button>
-        </div>
-    </div>
-</div>
-
 <script>
     // ============================================================
     // CONFIG
     // ============================================================
-    const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwTJtoktiXNT-AvUeM52ysrUGxPmTniKD3sSEfqoK3eThxtdySBVBDfh97dVxdW-Wk/exec';
+    const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwK3aQUCGQsqUZQJngqvvgLj-Vg2S9tdzSrDhxMQOlJ1qBlSQd1iug2xlmSKasvouA/exec';
 
     const APP = {
         currentUser: null,
@@ -1276,11 +1287,15 @@
         currentApplication: null,
         members: [],
         uploadedMembers: [],
-        cropperData: null,
         currentDocUpload: null,
         duplicateCheck: null,
         isFromCache: false,
-        syncedData: { dataSource: [], uploadedData: [] }
+        syncedData: { dataSource: [], uploadedData: [] },
+        dataVersion: { dataSourceVersion: 0, uploadedDataVersion: 0 },
+        isSyncing: false,
+        syncQueue: [],
+        syncInterval: null,
+        backgroundSyncRunning: false
     };
 
     // ============================================================
@@ -1289,22 +1304,36 @@
     document.addEventListener('DOMContentLoaded', function() {
         const savedToken = localStorage.getItem('sessionToken');
         const savedUser = localStorage.getItem('currentUser');
+        const savedVersion = localStorage.getItem('dataVersion');
+        
         if (savedToken && savedUser) {
             APP.sessionToken = savedToken;
             APP.currentUser = JSON.parse(savedUser);
+            if (savedVersion) {
+                try { APP.dataVersion = JSON.parse(savedVersion); } catch(e) {}
+            }
             showDashboard();
-            setTimeout(() => syncAllData(), 1000);
+            setTimeout(() => performInitialSync(), 500);
         }
+        
         window.addEventListener('online', function() {
             APP.isOnline = true;
             updateSyncStatus();
             syncPendingData();
-            syncAllData();
+            performBackgroundSync();
         });
+        
         window.addEventListener('offline', function() {
             APP.isOnline = false;
             updateSyncStatus();
         });
+        
+        APP.syncInterval = setInterval(() => {
+            if (APP.isOnline && APP.sessionToken) {
+                performBackgroundSync();
+            }
+        }, 180000);
+        
         document.getElementById('signupContact').addEventListener('input', function(e) {
             this.value = this.value.replace(/\D/g, '').slice(0, 10);
         });
@@ -1314,38 +1343,128 @@
     });
 
     // ============================================================
-    // SYNC
+    // SYNC FUNCTIONS
     // ============================================================
-    async function syncAllData() {
+    
+    async function performInitialSync() {
         if (!APP.isOnline || !APP.sessionToken) {
-            try {
-                const syncedDataSource = localStorage.getItem('syncedDataSource');
-                const syncedUploadedData = localStorage.getItem('syncedUploadedData');
-                const lastSync = localStorage.getItem('lastSyncTime');
-                if (syncedDataSource && syncedUploadedData) {
-                    APP.syncedData.dataSource = JSON.parse(syncedDataSource);
-                    APP.syncedData.uploadedData = JSON.parse(syncedUploadedData);
-                    if (lastSync) APP.lastSyncTime = parseInt(lastSync);
-                    updateSyncStatus();
-                    return true;
-                }
-            } catch(e) {}
-            return false;
+            loadFromLocalCache();
+            return;
         }
+        
         try {
-            const formData = new URLSearchParams({ action: 'sync_data', sessionToken: APP.sessionToken });
-            const response = await fetch(SCRIPT_URL, { method: 'POST', headers: { 'Content-Type': 'application/x-www-form-urlencoded' }, body: formData });
+            APP.isSyncing = true;
+            showSyncProgress(true);
+            document.getElementById('syncIndicator').textContent = '🔄 Syncing...';
+            document.getElementById('syncIndicator').style.color = '#63b3ed';
+            
+            const cachedData = getCachedLocalData();
+            if (cachedData && cachedData.dataSource && cachedData.dataSource.length > 0) {
+                APP.syncedData = cachedData;
+                APP.dataVersion = cachedData.version || { dataSourceVersion: 0, uploadedDataVersion: 0 };
+                updateSyncStatus();
+                updateSearchStats();
+                document.getElementById('cacheIndicator').classList.remove('hidden');
+                document.getElementById('syncIndicator').textContent = '✅ Online';
+                document.getElementById('syncIndicator').style.color = '#68d391';
+            }
+            
+            await syncFullData(true);
+            
+            APP.isSyncing = false;
+            showSyncProgress(false);
+            
+        } catch (error) {
+            console.error('Initial sync error:', error);
+            APP.isSyncing = false;
+            showSyncProgress(false);
+            loadFromLocalCache();
+        }
+    }
+    
+    function loadFromLocalCache() {
+        try {
+            const syncedDataSource = localStorage.getItem('syncedDataSource');
+            const syncedUploadedData = localStorage.getItem('syncedUploadedData');
+            const lastSync = localStorage.getItem('lastSyncTime');
+            const version = localStorage.getItem('dataVersion');
+            
+            if (syncedDataSource && syncedUploadedData) {
+                APP.syncedData.dataSource = JSON.parse(syncedDataSource);
+                APP.syncedData.uploadedData = JSON.parse(syncedUploadedData);
+                if (lastSync) APP.lastSyncTime = parseInt(lastSync);
+                if (version) APP.dataVersion = JSON.parse(version);
+                APP.isFromCache = true;
+                updateSyncStatus();
+                updateSearchStats();
+                document.getElementById('cacheIndicator').classList.remove('hidden');
+                return true;
+            }
+        } catch(e) {
+            console.error('Cache load error:', e);
+        }
+        return false;
+    }
+    
+    function getCachedLocalData() {
+        try {
+            const syncedDataSource = localStorage.getItem('syncedDataSource');
+            const syncedUploadedData = localStorage.getItem('syncedUploadedData');
+            const version = localStorage.getItem('dataVersion');
+            if (syncedDataSource && syncedUploadedData) {
+                return {
+                    dataSource: JSON.parse(syncedDataSource),
+                    uploadedData: JSON.parse(syncedUploadedData),
+                    version: version ? JSON.parse(version) : { dataSourceVersion: 0, uploadedDataVersion: 0 }
+                };
+            }
+        } catch(e) {}
+        return null;
+    }
+    
+    async function syncFullData(background = false) {
+        if (!APP.isOnline || !APP.sessionToken) return false;
+        
+        try {
+            const formData = new URLSearchParams({
+                action: 'sync_data',
+                sessionToken: APP.sessionToken,
+                clientVersion: APP.dataVersion.dataSourceVersion || '0'
+            });
+            
+            const response = await fetch(SCRIPT_URL, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                body: formData
+            });
             const result = await response.json();
+            
             if (result.success) {
-                APP.syncedData.dataSource = result.data.dataSource || [];
-                APP.syncedData.uploadedData = result.data.uploadedData || [];
+                const newData = result.data;
+                APP.syncedData.dataSource = newData.dataSource || [];
+                APP.syncedData.uploadedData = newData.uploadedData || [];
                 APP.lastSyncTime = Date.now();
+                
+                if (result.version) {
+                    APP.dataVersion = result.version;
+                    localStorage.setItem('dataVersion', JSON.stringify(result.version));
+                }
+                
                 try {
                     localStorage.setItem('syncedDataSource', JSON.stringify(APP.syncedData.dataSource));
                     localStorage.setItem('syncedUploadedData', JSON.stringify(APP.syncedData.uploadedData));
                     localStorage.setItem('lastSyncTime', APP.lastSyncTime.toString());
                 } catch(e) {}
+                
+                APP.isFromCache = false;
                 updateSyncStatus();
+                updateSearchStats();
+                document.getElementById('cacheIndicator').classList.add('hidden');
+                
+                if (!background) {
+                    showMessage('✅ Data synced! ' + APP.syncedData.dataSource.length + ' records loaded.', 'success');
+                    setTimeout(() => hideMessage(), 3000);
+                }
                 return true;
             } else {
                 console.error('Sync failed:', result.message);
@@ -1356,13 +1475,78 @@
             return false;
         }
     }
-
+    
+    async function performBackgroundSync() {
+        if (APP.backgroundSyncRunning || !APP.isOnline || !APP.sessionToken) return;
+        
+        APP.backgroundSyncRunning = true;
+        document.getElementById('backgroundSync').classList.remove('hidden');
+        
+        try {
+            const formData = new URLSearchParams({
+                action: 'check_updates',
+                sessionToken: APP.sessionToken,
+                clientVersion: APP.dataVersion.dataSourceVersion || '0'
+            });
+            
+            const response = await fetch(SCRIPT_URL, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                body: formData
+            });
+            const result = await response.json();
+            
+            if (result.success && result.needsUpdate) {
+                await syncFullData(true);
+                document.getElementById('syncIndicator').textContent = '✅ Updated';
+                document.getElementById('syncIndicator').style.color = '#68d391';
+            } else if (result.success) {
+                document.getElementById('syncIndicator').textContent = '✅ Up to date';
+                document.getElementById('syncIndicator').style.color = '#68d391';
+                updateSyncStatus();
+            }
+        } catch (error) {
+            console.error('Background sync error:', error);
+        }
+        
+        document.getElementById('backgroundSync').classList.add('hidden');
+        APP.backgroundSyncRunning = false;
+    }
+    
+    function showSyncProgress(show) {
+        const bar = document.getElementById('syncProgressBar');
+        const inner = document.getElementById('syncProgressBarInner');
+        if (show) {
+            bar.style.display = 'block';
+            inner.style.width = '30%';
+            setTimeout(() => { inner.style.width = '60%'; }, 300);
+            setTimeout(() => { inner.style.width = '90%'; }, 800);
+        } else {
+            inner.style.width = '100%';
+            setTimeout(() => {
+                bar.style.display = 'none';
+                inner.style.width = '0%';
+            }, 500);
+        }
+    }
+    
+    function updateSearchStats() {
+        const stats = document.getElementById('searchStats');
+        if (APP.syncedData.dataSource.length > 0) {
+            stats.textContent = '📊 ' + APP.syncedData.dataSource.length + ' records loaded | ' + APP.syncedData.uploadedData.length + ' uploaded';
+        } else {
+            stats.textContent = '';
+        }
+    }
+    
     function updateSyncStatus() {
         const indicator = document.getElementById('syncIndicator');
         const timeEl = document.getElementById('syncTime');
         const offlineBadge = document.getElementById('offlineBadge');
         const cacheIndicator = document.getElementById('cacheIndicator');
         const syncUserBadge = document.getElementById('syncUserBadge');
+        const versionInfo = document.getElementById('versionInfo');
+        
         if (!APP.isOnline) {
             indicator.textContent = '📡 Offline';
             indicator.style.color = '#f6ad55';
@@ -1373,12 +1557,24 @@
             offlineBadge.classList.add('hidden');
             if (APP.lastSyncTime) {
                 const time = new Date(APP.lastSyncTime);
-                timeEl.textContent = time.toLocaleTimeString();
+                timeEl.textContent = '🕐 ' + time.toLocaleTimeString();
             }
         }
-        if (APP.isFromCache) cacheIndicator.classList.remove('hidden');
-        else cacheIndicator.classList.add('hidden');
-        if (APP.currentUser) syncUserBadge.textContent = '👤 ' + APP.currentUser.name;
+        
+        if (APP.isFromCache) {
+            cacheIndicator.classList.remove('hidden');
+        } else {
+            cacheIndicator.classList.add('hidden');
+        }
+        
+        if (APP.currentUser) {
+            syncUserBadge.textContent = '👤 ' + APP.currentUser.name;
+        }
+        
+        if (APP.dataVersion && APP.dataVersion.dataSourceVersion) {
+            versionInfo.textContent = '📦 v' + APP.dataVersion.dataSourceVersion;
+            versionInfo.classList.remove('hidden');
+        }
     }
 
     // ============================================================
@@ -1402,7 +1598,7 @@
     function showMessage(text, type = 'info') {
         const msg = document.getElementById('message');
         msg.textContent = text;
-        msg.className = `message ${type}`;
+        msg.className = 'message ' + type;
         msg.style.display = 'block';
         clearTimeout(msg._timeout);
         msg._timeout = setTimeout(() => { msg.style.display = 'none'; }, 8000);
@@ -1414,7 +1610,7 @@
 
     function showLoading(btnId, textId, loadingText) {
         document.getElementById(btnId).disabled = true;
-        document.getElementById(textId).innerHTML = `<span class="loading"></span> ${loadingText}`;
+        document.getElementById(textId).innerHTML = '<span class="loading"></span> ' + loadingText;
     }
 
     function hideLoading(btnId, textId, originalText) {
@@ -1492,7 +1688,7 @@
             localStorage.setItem('currentUser', JSON.stringify(APP.currentUser));
             showDashboard();
             showMessage('✅ Welcome, ' + userData.name + '!', 'success');
-            await syncAllData();
+            await syncFullData();
             if (APP.syncedData.dataSource.length > 0) {
                 showMessage('✅ Data synced! ' + APP.syncedData.dataSource.length + ' records loaded.', 'success');
                 setTimeout(() => hideMessage(), 3000);
@@ -1546,6 +1742,7 @@
         document.getElementById('searchSection').classList.remove('hidden');
         document.getElementById('memberSection').classList.add('hidden');
         document.getElementById('searchInput').focus();
+        updateSearchStats();
     }
 
     async function performSearch() {
@@ -1554,13 +1751,16 @@
             showMessage('❌ Enter a search term.', 'error');
             return;
         }
+        
         const resultsDiv = document.getElementById('searchResults');
         resultsDiv.innerHTML = '<div style="text-align:center;padding:20px;color:#a0aec0;"><span class="loading"></span> Searching...</div>';
+        
         const syncedResults = searchSyncedData(searchTerm);
         if (syncedResults.length > 0) {
             displaySearchResults(syncedResults, true);
             return;
         }
+        
         if (!APP.isOnline) {
             const cached = localStorage.getItem('searchCache_' + searchTerm.toUpperCase());
             if (cached) {
@@ -1570,23 +1770,35 @@
                     return;
                 } catch(e) {}
             }
-            resultsDiv.innerHTML = `<div class="no-results"><span class="icon">🔍</span>No results found offline. Connect to search.</div>`;
+            resultsDiv.innerHTML = '<div class="no-results"><span class="icon">🔍</span>No results found offline. Connect to search.</div>';
             return;
         }
+        
         try {
-            const formData = new URLSearchParams({ action: 'search_data', searchTerm, sessionToken: APP.sessionToken });
-            const response = await fetch(SCRIPT_URL, { method: 'POST', headers: { 'Content-Type': 'application/x-www-form-urlencoded' }, body: formData });
+            const formData = new URLSearchParams({
+                action: 'search_data',
+                searchTerm,
+                sessionToken: APP.sessionToken
+            });
+            const response = await fetch(SCRIPT_URL, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                body: formData
+            });
             const result = await response.json();
+            
             if (!result.success) {
-                resultsDiv.innerHTML = `<div class="no-results"><span class="icon">🔍</span>${result.message || 'No results'}</div>`;
+                resultsDiv.innerHTML = '<div class="no-results"><span class="icon">🔍</span>' + (result.message || 'No results') + '</div>';
                 return;
             }
+            
             try {
                 localStorage.setItem('searchCache_' + searchTerm.toUpperCase(), JSON.stringify(result.data));
             } catch(e) {}
-            displaySearchResults(result.data, result.cached || false);
+            
+            displaySearchResults(result.data, result.fromCache || false);
         } catch (error) {
-            resultsDiv.innerHTML = `<div class="no-results"><span class="icon">❌</span>Search failed: ${error.message}</div>`;
+            resultsDiv.innerHTML = '<div class="no-results"><span class="icon">❌</span>Search failed: ' + error.message + '</div>';
         }
     }
 
@@ -1607,31 +1819,48 @@
     function displaySearchResults(data, fromCache) {
         const resultsDiv = document.getElementById('searchResults');
         if (data && data.length > 0) {
-            let html = fromCache ? '<div style="font-size:12px;color:#63b3ed;margin-bottom:8px;">📦 Results from cached data</div>' : '';
+            let html = '';
+            if (fromCache) {
+                html += '<div style="font-size:12px;color:#63b3ed;margin-bottom:8px;">📦 Results from cached data</div>';
+            }
             data.forEach(item => {
-                html += `<div class="search-result-item" onclick="selectApplication('${item.applicationNo}')">
-                    <div class="result-app-no">📄 ${item.applicationNo}</div>
-                    <div class="result-hof">👤 ${item.headOfFamily}</div>
-                    <div class="result-mobile">📱 ${item.hofMobile}</div>
-                    <div class="result-members">👪 ${item.totalMembers} member${item.totalMembers > 1 ? 's' : ''} | 📍 ${item.cat || 'N/A'}</div>
-                </div>`;
+                html += '<div class="search-result-item" onclick="selectApplication(\'' + item.applicationNo + '\')">' +
+                    '<div class="result-app-no">📄 ' + item.applicationNo + '</div>' +
+                    '<div class="result-hof">👤 ' + item.headOfFamily + '</div>' +
+                    '<div class="result-mobile">📱 ' + item.hofMobile + '</div>' +
+                    '<div class="result-members">👪 ' + item.totalMembers + ' member' + (item.totalMembers > 1 ? 's' : '') + ' | 📍 ' + (item.cat || 'N/A') + '</div>' +
+                    '</div>';
             });
             resultsDiv.innerHTML = html;
         } else {
-            resultsDiv.innerHTML = `<div class="no-results"><span class="icon">🔍</span>No matching records</div>`;
+            resultsDiv.innerHTML = '<div class="no-results"><span class="icon">🔍</span>No matching records</div>';
         }
     }
 
     // ============================================================
-    // SELECT APPLICATION with Duplicate Check
+    // SELECT APPLICATION
     // ============================================================
     async function selectApplication(applicationNo) {
         document.getElementById('searchResults').innerHTML = '<div style="text-align:center;padding:20px;color:#a0aec0;"><span class="loading"></span> Loading members...</div>';
         APP.isFromCache = false;
+        
         try {
-            if (APP.isOnline) {
-                const dupFormData = new URLSearchParams({ action: 'check_duplicate', applicationNo, sessionToken: APP.sessionToken });
-                const dupResponse = await fetch(SCRIPT_URL, { method: 'POST', headers: { 'Content-Type': 'application/x-www-form-urlencoded' }, body: dupFormData });
+            const syncedMembers = APP.syncedData.uploadedData.filter(u => u.applicationNo === applicationNo);
+            if (syncedMembers.length > 0) {
+                APP.duplicateCheck = { exists: true, count: syncedMembers.length };
+                document.getElementById('duplicateWarning').classList.remove('hidden');
+                document.getElementById('duplicateCount').textContent = syncedMembers.length;
+            } else if (APP.isOnline) {
+                const dupFormData = new URLSearchParams({
+                    action: 'check_duplicate',
+                    applicationNo,
+                    sessionToken: APP.sessionToken
+                });
+                const dupResponse = await fetch(SCRIPT_URL, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                    body: dupFormData
+                });
                 const dupResult = await dupResponse.json();
                 if (dupResult.success) {
                     APP.duplicateCheck = dupResult.data;
@@ -1642,23 +1871,26 @@
                         document.getElementById('duplicateWarning').classList.add('hidden');
                     }
                 }
+            } else {
+                document.getElementById('duplicateWarning').classList.add('hidden');
             }
-
+            
             let memberData = null;
             let fromCache = false;
-            const syncedMembers = APP.syncedData.uploadedData.filter(u => u.applicationNo === applicationNo);
-            if (syncedMembers.length > 0) {
-                const appInfo = APP.syncedData.dataSource.find(d => d.applicationNo === applicationNo);
-                const totalMembers = appInfo ? appInfo.totalMembers : 1;
-                const headOfFamily = appInfo ? appInfo.headOfFamily : '';
-                const hofMobile = appInfo ? appInfo.hofMobile : '';
+            
+            const appInfo = APP.syncedData.dataSource.find(d => d.applicationNo === applicationNo);
+            if (appInfo) {
+                const totalMembers = appInfo.totalMembers || 1;
+                const headOfFamily = appInfo.headOfFamily || '';
+                const hofMobile = appInfo.hofMobile || '';
                 const members = [];
+                
                 for (let i = 1; i <= totalMembers; i++) {
-                    const memberId = `${applicationNo}-${String(i).padStart(3, '0')}`;
+                    const memberId = applicationNo + '-' + String(i).padStart(3, '0');
                     const existing = syncedMembers.find(m => m.memberId === memberId);
                     members.push({
                         memberId: memberId,
-                        memberName: existing ? existing.memberName : (i === 1 ? headOfFamily : `Member ${i}`),
+                        memberName: existing ? existing.memberName : (i === 1 ? headOfFamily : 'Member ' + i),
                         isHead: i === 1,
                         memberIndex: i,
                         aadharFront: existing ? existing.aadharFront : '',
@@ -1670,6 +1902,7 @@
                         uploadedBy: existing ? existing.uploadedBy : ''
                     });
                 }
+                
                 memberData = {
                     applicationNo: applicationNo,
                     headOfFamily: headOfFamily,
@@ -1679,15 +1912,25 @@
                 };
                 fromCache = true;
             }
+            
             if (!memberData && APP.isOnline) {
-                const formData = new URLSearchParams({ action: 'get_family_members', applicationNo, sessionToken: APP.sessionToken });
-                const response = await fetch(SCRIPT_URL, { method: 'POST', headers: { 'Content-Type': 'application/x-www-form-urlencoded' }, body: formData });
+                const formData = new URLSearchParams({
+                    action: 'get_family_members',
+                    applicationNo,
+                    sessionToken: APP.sessionToken
+                });
+                const response = await fetch(SCRIPT_URL, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                    body: formData
+                });
                 const result = await response.json();
                 if (result.success) {
                     memberData = result.data;
-                    fromCache = result.cached || false;
+                    fromCache = result.fromCache || false;
                 }
             }
+            
             if (!memberData) {
                 const cached = localStorage.getItem('familyCache_' + applicationNo);
                 if (cached) {
@@ -1697,25 +1940,34 @@
                     } catch(e) {}
                 }
             }
+            
             if (!memberData) {
                 showMessage('❌ Failed to load family members.', 'error');
                 showSearch();
                 return;
             }
+            
+            try {
+                localStorage.setItem('familyCache_' + applicationNo, JSON.stringify(memberData));
+            } catch(e) {}
+            
             APP.isFromCache = fromCache;
             APP.currentApplication = memberData;
             APP.members = memberData.members || [];
             APP.uploadedMembers = memberData.members ? memberData.members.filter(m => m.isUploaded) : [];
+            
             renderMemberList();
             document.getElementById('searchSection').classList.add('hidden');
             document.getElementById('memberSection').classList.remove('hidden');
             document.getElementById('memberAppTitle').textContent = '📄 Application: ' + memberData.applicationNo;
             document.getElementById('memberHofInfo').textContent = '👤 Head: ' + memberData.headOfFamily + ' | 📱 ' + memberData.hofMobile;
+            
             if (APP.isFromCache) {
                 document.getElementById('cacheInfo').style.display = 'block';
             } else {
                 document.getElementById('cacheInfo').style.display = 'none';
             }
+            
             updateSyncStatus();
         } catch (error) {
             showMessage('❌ Failed: ' + error.message, 'error');
@@ -1724,7 +1976,7 @@
     }
 
     // ============================================================
-    // RENDER MEMBER LIST - compact status on label with progress
+    // RENDER MEMBER LIST
     // ============================================================
     function renderMemberList() {
         const container = document.getElementById('memberList');
@@ -1747,82 +1999,68 @@
                 { key: 'voterSlip', label: '📄 Voter Slip' }
             ];
 
-            html += `
-                <div class="member-card ${isUploaded ? 'uploaded' : ''} ${isDuplicate ? 'duplicate-app' : ''}" id="memberCard_${memberId}">
-                    <div class="member-card-header">
-                        <span class="member-title">${isHead ? '👤 Head' : '👤 Member ' + member.memberIndex}</span>
-                        <span>
-                            <span class="member-badge ${isHead ? 'head' : 'member'}">${isHead ? 'HEAD' : 'MEMBER'}</span>
-                            ${isUploaded ? '<span class="member-badge uploaded">✅ Uploaded</span>' : ''}
-                            ${isDuplicate && !isUploaded ? '<span class="member-badge duplicate">⚠️ Duplicate App</span>' : ''}
-                        </span>
-                    </div>
-                    <div class="member-id-display">🆔 ${memberId}</div>
-                    ${uploadedBy ? `<div class="uploaded-by-info">👤 Uploaded by: ${uploadedBy}</div>` : ''}
-
-                    <div class="form-group">
-                        <label>Member Name <span class="required">*</span></label>
-                        <input type="text" id="memberName_${memberId}" value="${headValue}" placeholder="Enter member name" ${isHeadReadOnly} ${isHead ? 'style="background:rgba(72,187,120,0.08);border-color:rgba(72,187,120,0.2);color:#68d391;"' : ''}>
-                    </div>
-
-                    <div class="member-doc-row">
-            `;
+            html += '<div class="member-card ' + (isUploaded ? 'uploaded' : '') + (isDuplicate ? ' duplicate-app' : '') + '" id="memberCard_' + memberId + '">' +
+                '<div class="member-card-header">' +
+                    '<span class="member-title">' + (isHead ? '👤 Head' : '👤 Member ' + member.memberIndex) + '</span>' +
+                    '<span>' +
+                        '<span class="member-badge ' + (isHead ? 'head' : 'member') + '">' + (isHead ? 'HEAD' : 'MEMBER') + '</span>' +
+                        (isUploaded ? '<span class="member-badge uploaded">✅ Uploaded</span>' : '') +
+                        (isDuplicate && !isUploaded ? '<span class="member-badge duplicate">⚠️ Duplicate App</span>' : '') +
+                    '</span>' +
+                '</div>' +
+                '<div class="member-id-display">🆔 ' + memberId + '</div>' +
+                (uploadedBy ? '<div class="uploaded-by-info">👤 Uploaded by: ' + uploadedBy + '</div>' : '') +
+                '<div class="form-group">' +
+                    '<label>Member Name <span class="required">*</span></label>' +
+                    '<input type="text" id="memberName_' + memberId + '" value="' + headValue + '" placeholder="Enter member name" ' + isHeadReadOnly + (isHead ? ' style="background:rgba(72,187,120,0.08);border-color:rgba(72,187,120,0.2);color:#68d391;"' : '') + '>' +
+                '</div>' +
+                '<div class="member-doc-row">';
 
             docFields.forEach(({ key, label }, index) => {
                 const has = !!member[key];
-                const icon = has ? '✅' : '⚠️';
                 const cls = has ? 'tick' : 'warn';
-                // Only start a new column when index is even
+                const icon = has ? '✅' : '⚠️';
                 if (index % 2 === 0) {
-                    html += `<div class="member-doc-item">`;
+                    html += '<div class="member-doc-item">';
                 }
-                html += `
-                    <span class="doc-label" id="label_${key}_${memberId}">
-                        ${label} <span class="${cls}" id="statusIcon_${key}_${memberId}">${icon}</span>
-                    </span>
-                    <div class="doc-upload-area ${has ? 'has-doc' : ''}" id="docArea_${key}_${memberId}">
-                        ${has ? 
-                            `<img class="doc-preview" src="${member[key]}" alt="${key}">
-                            <button class="remove-doc-btn" onclick="event.stopPropagation();removeDoc('${memberId}','${key}')">✕</button>` : 
-                            `<span class="doc-icon">📷</span>
-                            <span class="doc-label-text">Tap to upload</span>
-                            <div class="photo-actions-compact">
-                                <button class="btn-camera" onclick="event.stopPropagation();openCamera('${memberId}','${key}')">📸 Camera</button>
-                            </div>`
-                        }
-                        <input type="file" class="camera-input" id="docInput_${key}_${memberId}" accept="image/*" capture="environment" onchange="handleDocUpload(event,'${memberId}','${key}')">
-                        <div class="upload-progress" id="progress_${key}_${memberId}"><div class="bar" id="bar_${key}_${memberId}"></div></div>
-                    </div>
-                    <input type="hidden" id="doc_${key}_${memberId}" value="${member[key] || ''}">
-                `;
+                html += '<span class="doc-label" id="label_' + key + '_' + memberId + '">' +
+                    label + ' <span class="' + cls + '" id="statusIcon_' + key + '_' + memberId + '">' + icon + '</span>' +
+                    '</span>' +
+                    '<div class="doc-upload-area ' + (has ? 'has-doc' : '') + '" id="docArea_' + key + '_' + memberId + '">' +
+                    (has ? 
+                        '<img class="doc-preview" src="' + member[key] + '" alt="' + key + '">' +
+                        '<button class="remove-doc-btn" onclick="event.stopPropagation();removeDoc(\'' + memberId + '\',\'' + key + '\')">✕</button>' : 
+                        '<span class="doc-icon">📷</span>' +
+                        '<span class="doc-label-text">Tap to upload</span>' +
+                        '<div class="photo-actions-compact">' +
+                            '<button class="btn-camera" onclick="event.stopPropagation();openCamera(\'' + memberId + '\',\'' + key + '\')">📸 Camera</button>' +
+                        '</div>'
+                    ) +
+                    '<input type="file" class="camera-input" id="docInput_' + key + '_' + memberId + '" accept="image/*" capture="environment" onchange="handleDocUpload(event,\'' + memberId + '\',\'' + key + '\')">' +
+                    '<div class="upload-progress" id="progress_' + key + '_' + memberId + '"><div class="bar" id="bar_' + key + '_' + memberId + '"></div></div>' +
+                    '</div>' +
+                    '<input type="hidden" id="doc_' + key + '_' + memberId + '" value="' + (member[key] || '') + '">';
                 if (index % 2 === 1 || index === docFields.length - 1) {
-                    html += `</div>`;
+                    html += '</div>';
                 }
             });
 
-            html += `
-                    </div>
-                </div>
-            `;
+            html += '</div></div>';
         });
         container.innerHTML = html;
         document.getElementById('saveAllBtn').classList.remove('hidden');
     }
 
     // ============================================================
-    // CAMERA UPLOAD with progress bar that goes to 100% then ✅ appears
+    // CAMERA UPLOAD
     // ============================================================
     function openCamera(memberId, field) {
-        const input = document.getElementById(`docInput_${field}_${memberId}`);
+        const input = document.getElementById('docInput_' + field + '_' + memberId);
         if (input) {
             input.setAttribute('capture', 'environment');
             input.click();
         }
     }
-
-    let currentDocData = null;
-    let currentDocMemberId = null;
-    let currentDocField = null;
 
     function handleDocUpload(event, memberId, field) {
         const file = event.target.files[0];
@@ -1832,17 +2070,12 @@
             event.target.value = '';
             return;
         }
-        currentDocMemberId = memberId;
-        currentDocField = field;
-        currentDocData = file;
 
-        // Show progress bar and start animation
-        const progressDiv = document.getElementById(`progress_${field}_${memberId}`);
-        const bar = document.getElementById(`bar_${field}_${memberId}`);
+        const progressDiv = document.getElementById('progress_' + field + '_' + memberId);
+        const bar = document.getElementById('bar_' + field + '_' + memberId);
         if (progressDiv) progressDiv.style.display = 'block';
         if (bar) bar.style.width = '0%';
 
-        // Animate progress from 0 to 100% smoothly while reading
         const reader = new FileReader();
         let progressInterval = setInterval(() => {
             if (bar) {
@@ -1854,11 +2087,8 @@
         }, 50);
 
         reader.onload = function(e) {
-            // Complete the progress bar to 100%
             if (bar) bar.style.width = '100%';
             clearInterval(progressInterval);
-
-            // Upload the image
             uploadOriginalImage(e.target.result, memberId, field);
             event.target.value = '';
         };
@@ -1879,7 +2109,7 @@
         try {
             const formData = new URLSearchParams({
                 action: 'upload_photo',
-                fileName: `${memberId}_${field}_${Date.now()}.jpg`,
+                fileName: memberId + '_' + field + '_' + Date.now() + '.jpg',
                 fileData: base64Data,
                 fileType: 'image/jpeg',
                 applicationNo: APP.currentApplication.applicationNo,
@@ -1890,49 +2120,36 @@
             const response = await fetch(SCRIPT_URL, { method: 'POST', headers: { 'Content-Type': 'application/x-www-form-urlencoded' }, body: formData });
             const result = await response.json();
 
-            // Hide progress bar
-            const progressDiv = document.getElementById(`progress_${field}_${memberId}`);
-            const bar = document.getElementById(`bar_${field}_${memberId}`);
+            const progressDiv = document.getElementById('progress_' + field + '_' + memberId);
+            const bar = document.getElementById('bar_' + field + '_' + memberId);
             if (progressDiv) progressDiv.style.display = 'none';
             if (bar) bar.style.width = '0%';
 
             if (result.success) {
-                document.getElementById(`doc_${field}_${memberId}`).value = result.fileUrl;
-                const area = document.getElementById(`docArea_${field}_${memberId}`);
+                document.getElementById('doc_' + field + '_' + memberId).value = result.fileUrl;
+                const area = document.getElementById('docArea_' + field + '_' + memberId);
                 area.classList.add('has-doc');
-                area.innerHTML = `
-                    <img class="doc-preview" src="${result.fileUrl}" alt="${field}">
-                    <button class="remove-doc-btn" onclick="event.stopPropagation();removeDoc('${memberId}','${field}')">✕</button>
-                    <input type="file" class="camera-input" id="docInput_${field}_${memberId}" accept="image/*" capture="environment" onchange="handleDocUpload(event,'${memberId}','${field}')">
-                    <div class="upload-progress" id="progress_${field}_${memberId}"><div class="bar" id="bar_${field}_${memberId}"></div></div>
-                `;
+                area.innerHTML = '<img class="doc-preview" src="' + result.fileUrl + '" alt="' + field + '">' +
+                    '<button class="remove-doc-btn" onclick="event.stopPropagation();removeDoc(\'' + memberId + '\',\'' + field + '\')">✕</button>' +
+                    '<input type="file" class="camera-input" id="docInput_' + field + '_' + memberId + '" accept="image/*" capture="environment" onchange="handleDocUpload(event,\'' + memberId + '\',\'' + field + '\')">' +
+                    '<div class="upload-progress" id="progress_' + field + '_' + memberId + '"><div class="bar" id="bar_' + field + '_' + memberId + '"></div></div>';
+                
                 const member = APP.members.find(m => m.memberId === memberId);
                 if (member) { member[field] = result.fileUrl; member.isUploaded = true; member.uploadedBy = APP.currentUser.name; }
 
-                // Update status icon to ✅
-                const iconSpan = document.getElementById(`statusIcon_${field}_${memberId}`);
+                const iconSpan = document.getElementById('statusIcon_' + field + '_' + memberId);
                 if (iconSpan) {
                     iconSpan.textContent = '✅';
                     iconSpan.className = 'tick';
                 }
-                // Update label class
-                const label = document.getElementById(`label_${field}_${memberId}`);
-                if (label) {
-                    const clsSpan = label.querySelector('span');
-                    if (clsSpan) {
-                        clsSpan.className = 'tick';
-                        clsSpan.textContent = '✅';
-                    }
-                }
 
                 showMessage('✅ Document uploaded!', 'success');
                 setTimeout(() => hideMessage(), 2000);
-                const card = document.getElementById(`memberCard_${memberId}`);
+                const card = document.getElementById('memberCard_' + memberId);
                 if (card) card.classList.add('uploaded');
             } else {
                 showMessage('❌ Upload failed: ' + (result.error || result.message), 'error');
-                // Revert icon to ⚠️
-                const iconSpan = document.getElementById(`statusIcon_${field}_${memberId}`);
+                const iconSpan = document.getElementById('statusIcon_' + field + '_' + memberId);
                 if (iconSpan) {
                     iconSpan.textContent = '⚠️';
                     iconSpan.className = 'warn';
@@ -1940,34 +2157,31 @@
             }
         } catch (error) {
             showMessage('❌ Upload failed: ' + error.message, 'error');
-            const iconSpan = document.getElementById(`statusIcon_${field}_${memberId}`);
+            const iconSpan = document.getElementById('statusIcon_' + field + '_' + memberId);
             if (iconSpan) {
                 iconSpan.textContent = '⚠️';
                 iconSpan.className = 'warn';
             }
-            const progressDiv = document.getElementById(`progress_${field}_${memberId}`);
-            const bar = document.getElementById(`bar_${field}_${memberId}`);
+            const progressDiv = document.getElementById('progress_' + field + '_' + memberId);
+            const bar = document.getElementById('bar_' + field + '_' + memberId);
             if (progressDiv) progressDiv.style.display = 'none';
             if (bar) bar.style.width = '0%';
         }
     }
 
     function removeDoc(memberId, field) {
-        document.getElementById(`doc_${field}_${memberId}`).value = '';
-        const area = document.getElementById(`docArea_${field}_${memberId}`);
+        document.getElementById('doc_' + field + '_' + memberId).value = '';
+        const area = document.getElementById('docArea_' + field + '_' + memberId);
         area.classList.remove('has-doc');
-        area.innerHTML = `
-            <span class="doc-icon">📷</span>
-            <span class="doc-label-text">Tap to upload</span>
-            <div class="photo-actions-compact">
-                <button class="btn-camera" onclick="event.stopPropagation();openCamera('${memberId}','${field}')">📸 Camera</button>
-            </div>
-            <input type="file" class="camera-input" id="docInput_${field}_${memberId}" accept="image/*" capture="environment" onchange="handleDocUpload(event,'${memberId}','${field}')">
-            <div class="upload-progress" id="progress_${field}_${memberId}"><div class="bar" id="bar_${field}_${memberId}"></div></div>
-        `;
+        area.innerHTML = '<span class="doc-icon">📷</span>' +
+            '<span class="doc-label-text">Tap to upload</span>' +
+            '<div class="photo-actions-compact">' +
+                '<button class="btn-camera" onclick="event.stopPropagation();openCamera(\'' + memberId + '\',\'' + field + '\')">📸 Camera</button>' +
+            '</div>' +
+            '<input type="file" class="camera-input" id="docInput_' + field + '_' + memberId + '" accept="image/*" capture="environment" onchange="handleDocUpload(event,\'' + memberId + '\',\'' + field + '\')">' +
+            '<div class="upload-progress" id="progress_' + field + '_' + memberId + '"><div class="bar" id="bar_' + field + '_' + memberId + '"></div></div>';
 
-        // Update status icon to ⚠️
-        const iconSpan = document.getElementById(`statusIcon_${field}_${memberId}`);
+        const iconSpan = document.getElementById('statusIcon_' + field + '_' + memberId);
         if (iconSpan) {
             iconSpan.textContent = '⚠️';
             iconSpan.className = 'warn';
@@ -1977,7 +2191,7 @@
         if (member) {
             member[field] = '';
             const hasDocs = member.aadharFront || member.aadharBack || member.voterFront || member.voterBack || member.voterSlip;
-            if (!hasDocs) { member.isUploaded = false; const card = document.getElementById(`memberCard_${memberId}`); if (card) card.classList.remove('uploaded'); }
+            if (!hasDocs) { member.isUploaded = false; const card = document.getElementById('memberCard_' + memberId); if (card) card.classList.remove('uploaded'); }
         }
         showMessage('🗑️ Document removed', 'info');
         setTimeout(() => hideMessage(), 1500);
@@ -1995,10 +2209,10 @@
 
         APP.members.forEach(member => {
             const memberId = member.memberId;
-            const name = document.getElementById(`memberName_${memberId}`).value.trim();
+            const name = document.getElementById('memberName_' + memberId).value.trim();
             if (!name && !member.isHead) {
                 hasError = true;
-                showMessage(`❌ Enter name for Member ${member.memberIndex}`, 'error');
+                showMessage('❌ Enter name for Member ' + member.memberIndex, 'error');
                 return;
             }
             if (!name && member.isHead) {
@@ -2010,11 +2224,11 @@
                     hofMobile: APP.currentApplication.hofMobile,
                     memberId: memberId,
                     memberName: headName,
-                    aadharFront: document.getElementById(`doc_aadharFront_${memberId}`).value || '',
-                    aadharBack: document.getElementById(`doc_aadharBack_${memberId}`).value || '',
-                    voterFront: document.getElementById(`doc_voterFront_${memberId}`).value || '',
-                    voterBack: document.getElementById(`doc_voterBack_${memberId}`).value || '',
-                    voterSlip: document.getElementById(`doc_voterSlip_${memberId}`).value || ''
+                    aadharFront: document.getElementById('doc_aadharFront_' + memberId).value || '',
+                    aadharBack: document.getElementById('doc_aadharBack_' + memberId).value || '',
+                    voterFront: document.getElementById('doc_voterFront_' + memberId).value || '',
+                    voterBack: document.getElementById('doc_voterBack_' + memberId).value || '',
+                    voterSlip: document.getElementById('doc_voterSlip_' + memberId).value || ''
                 });
                 return;
             }
@@ -2024,11 +2238,11 @@
                 hofMobile: APP.currentApplication.hofMobile,
                 memberId: memberId,
                 memberName: name,
-                aadharFront: document.getElementById(`doc_aadharFront_${memberId}`).value || '',
-                aadharBack: document.getElementById(`doc_aadharBack_${memberId}`).value || '',
-                voterFront: document.getElementById(`doc_voterFront_${memberId}`).value || '',
-                voterBack: document.getElementById(`doc_voterBack_${memberId}`).value || '',
-                voterSlip: document.getElementById(`doc_voterSlip_${memberId}`).value || ''
+                aadharFront: document.getElementById('doc_aadharFront_' + memberId).value || '',
+                aadharBack: document.getElementById('doc_aadharBack_' + memberId).value || '',
+                voterFront: document.getElementById('doc_voterFront_' + memberId).value || '',
+                voterBack: document.getElementById('doc_voterBack_' + memberId).value || '',
+                voterSlip: document.getElementById('doc_voterSlip_' + memberId).value || ''
             });
         });
         if (hasError) { hideLoading('saveAllBtn', 'saveAllBtnText', 'Save All Members'); return; }
@@ -2061,33 +2275,30 @@
             if (result.success) {
                 let msg = '✅ Your Data forwarded to GP';
                 if (result.data && result.data.duplicates > 0) {
-                    msg += `\n⚠️ ${result.data.duplicates} duplicate application(s) found and updated.`;
+                    msg += '\n⚠️ ' + result.data.duplicates + ' duplicate application(s) found and updated.';
                 }
-                msg += `\n👤 Uploaded by: ${APP.currentUser.name}`;
+                msg += '\n👤 Uploaded by: ' + APP.currentUser.name;
                 showMessage(msg, 'success');
 
                 APP.members.forEach(m => {
                     const memberId = m.memberId;
                     if (!m.isHead) {
-                        document.getElementById(`memberName_${memberId}`).value = '';
+                        document.getElementById('memberName_' + memberId).value = '';
                     }
                     ['aadharFront','aadharBack','voterFront','voterBack','voterSlip'].forEach(field => {
-                        document.getElementById(`doc_${field}_${memberId}`).value = '';
-                        const area = document.getElementById(`docArea_${field}_${memberId}`);
+                        document.getElementById('doc_' + field + '_' + memberId).value = '';
+                        const area = document.getElementById('docArea_' + field + '_' + memberId);
                         if (area) {
                             area.classList.remove('has-doc');
-                            area.innerHTML = `
-                                <span class="doc-icon">📷</span>
-                                <span class="doc-label-text">Tap to upload</span>
-                                <div class="photo-actions-compact">
-                                    <button class="btn-camera" onclick="event.stopPropagation();openCamera('${memberId}','${field}')">📸 Camera</button>
-                                </div>
-                                <input type="file" class="camera-input" id="docInput_${field}_${memberId}" accept="image/*" capture="environment" onchange="handleDocUpload(event,'${memberId}','${field}')">
-                                <div class="upload-progress" id="progress_${field}_${memberId}"><div class="bar" id="bar_${field}_${memberId}"></div></div>
-                            `;
+                            area.innerHTML = '<span class="doc-icon">📷</span>' +
+                                '<span class="doc-label-text">Tap to upload</span>' +
+                                '<div class="photo-actions-compact">' +
+                                    '<button class="btn-camera" onclick="event.stopPropagation();openCamera(\'' + memberId + '\',\'' + field + '\')">📸 Camera</button>' +
+                                '</div>' +
+                                '<input type="file" class="camera-input" id="docInput_' + field + '_' + memberId + '" accept="image/*" capture="environment" onchange="handleDocUpload(event,\'' + memberId + '\',\'' + field + '\')">' +
+                                '<div class="upload-progress" id="progress_' + field + '_' + memberId + '"><div class="bar" id="bar_' + field + '_' + memberId + '"></div></div>';
                         }
-                        // Reset status icon to ⚠️
-                        const iconSpan = document.getElementById(`statusIcon_${field}_${memberId}`);
+                        const iconSpan = document.getElementById('statusIcon_' + field + '_' + memberId);
                         if (iconSpan) {
                             iconSpan.textContent = '⚠️';
                             iconSpan.className = 'warn';
@@ -2096,7 +2307,7 @@
                     });
                     m.isUploaded = false;
                     m.uploadedBy = '';
-                    const card = document.getElementById(`memberCard_${memberId}`);
+                    const card = document.getElementById('memberCard_' + memberId);
                     if (card) card.classList.remove('uploaded');
                 });
                 APP.uploadedMembers = [];
@@ -2107,7 +2318,7 @@
                 searchKeys.forEach(k => localStorage.removeItem(k));
                 APP.isFromCache = false;
                 updateSyncStatus();
-                await syncAllData();
+                await syncFullData();
                 setTimeout(() => {
                     backToSearch();
                     showMessage('🔄 Ready for next entry. Search for another application.', 'info');
@@ -2140,7 +2351,7 @@
         if (pending.length === 0) { showMessage('📊 No pending uploads.', 'info'); return; }
         let msg = '📊 Pending Uploads: ' + pending.length + '\n\n';
         pending.forEach((m, i) => {
-            msg += `${i+1}. ${m.memberName} (${m.memberId})\n   📄 ${m.applicationNo}\n   👤 ${m._user || 'Unknown'}\n`;
+            msg += (i+1) + '. ' + m.memberName + ' (' + m.memberId + ')\n   📄 ' + m.applicationNo + '\n   👤 ' + (m._user || 'Unknown') + '\n';
         });
         msg += '\n💡 Sync when online and save.';
         showMessage(msg, 'info');
@@ -2228,12 +2439,14 @@
                 localStorage.removeItem('pendingMembers');
                 showMessage('✅ Synced ' + pending.length + ' pending records.', 'success');
                 setTimeout(() => hideMessage(), 3000);
-                await syncAllData();
+                await syncFullData();
             }
         } catch (e) { console.log('Sync pending error:', e); }
     }
 
+    // ============================================================
     // MODAL HANDLERS
+    // ============================================================
     document.getElementById('passwordModal').addEventListener('click', function(e) { if (e.target === this) closePasswordModal(); });
     document.addEventListener('keydown', function(e) {
         if (e.key === 'Escape') {
@@ -2242,13 +2455,12 @@
         if (e.key === 'Enter' && !document.getElementById('searchSection').classList.contains('hidden')) performSearch();
     });
 
-    setInterval(() => {
-        if (APP.isOnline && APP.sessionToken) {
-            syncPendingData();
-            syncAllData();
+    // Clean up interval on page unload
+    window.addEventListener('beforeunload', function() {
+        if (APP.syncInterval) {
+            clearInterval(APP.syncInterval);
         }
-        updateSyncStatus();
-    }, 120000);
+    });
 </script>
 </body>
 </html>
