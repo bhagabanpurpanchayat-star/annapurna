@@ -675,7 +675,6 @@
             transform: rotate(90deg);
         }
 
-        /* search & results */
         .search-section {
             margin-top: 12px;
         }
@@ -749,7 +748,6 @@
             margin-bottom: 10px;
         }
 
-        /* Member cards */
         .member-card {
             background: rgba(255, 255, 255, 0.04);
             border-radius: 14px;
@@ -833,8 +831,12 @@
             color: #a0aec0;
             font-weight: 600;
             margin-bottom: 4px;
-            display: block;
+            display: flex;
+            align-items: center;
+            gap: 6px;
         }
+        .member-doc-item .doc-label .tick { color: #48bb78; }
+        .member-doc-item .doc-label .warn { color: #f6ad55; }
 
         .member-doc-item .doc-upload-area {
             border: 1.5px dashed rgba(255, 255, 255, 0.08);
@@ -860,12 +862,10 @@
         .member-doc-item .doc-upload-area .doc-icon {
             font-size: 28px;
         }
-
         .member-doc-item .doc-upload-area .doc-label-text {
             font-size: 12px;
             color: rgba(255, 255, 255, 0.4);
         }
-
         .member-doc-item .doc-upload-area .doc-preview {
             max-width: 100%;
             max-height: 70px;
@@ -1010,101 +1010,52 @@
             margin-top: 4px;
         }
 
-        /* responsive */
+        .upload-progress {
+            width: 100%;
+            height: 6px;
+            background: rgba(255,255,255,0.1);
+            border-radius: 10px;
+            margin-top: 8px;
+            overflow: hidden;
+            display: none;
+        }
+        .upload-progress .bar {
+            width: 0%;
+            height: 100%;
+            background: linear-gradient(90deg, #48bb78, #68d391);
+            border-radius: 10px;
+            transition: width 0.3s ease;
+        }
+
         @media (max-width: 480px) {
-            .form-row {
-                grid-template-columns: 1fr;
-                gap: 0;
-            }
-            .form-row .form-group {
-                margin-bottom: 14px;
-            }
-            .container {
-                padding: 14px 12px 18px;
-            }
-            input, select {
-                font-size: 16px;
-                padding: 14px 16px;
-            }
-            .quick-actions-compact {
-                grid-template-columns: 1fr 1fr;
-                gap: 6px;
-            }
-            .quick-action-btn-compact {
-                padding: 10px 4px;
-            }
-            .quick-action-btn-compact .icon {
-                font-size: 22px;
-            }
-            .member-doc-row {
-                grid-template-columns: 1fr;
-            }
-            .member-doc-item .doc-upload-area {
-                min-height: 90px;
-            }
-            .photo-actions-compact button {
-                font-size: 14px;
-                padding: 10px 12px;
-                min-width: 70px;
-            }
-            .header h1 {
-                font-size: 22px;
-            }
-            .tab {
-                font-size: 14px;
-                padding: 10px;
-            }
-            .submit-btn {
-                font-size: 16px;
-                padding: 14px;
-            }
-            .search-result-item {
-                padding: 10px 12px;
-            }
-            .member-card-header .member-title {
-                font-size: 15px;
-            }
-            .member-card-header .member-badge {
-                font-size: 11px;
-                padding: 3px 10px;
-            }
-            label {
-                font-size: 14px;
-            }
-            .sync-status {
-                font-size: 11px;
-                gap: 8px;
-                flex-wrap: wrap;
-            }
-            .modal {
-                max-width: 95%;
-                padding: 18px;
-            }
-            .modal-header h3 {
-                font-size: 18px;
-            }
+            .form-row { grid-template-columns: 1fr; gap: 0; }
+            .form-row .form-group { margin-bottom: 14px; }
+            .container { padding: 14px 12px 18px; }
+            input, select { font-size: 16px; padding: 14px 16px; }
+            .quick-actions-compact { grid-template-columns: 1fr 1fr; gap: 6px; }
+            .quick-action-btn-compact { padding: 10px 4px; }
+            .quick-action-btn-compact .icon { font-size: 22px; }
+            .member-doc-row { grid-template-columns: 1fr; }
+            .member-doc-item .doc-upload-area { min-height: 90px; }
+            .photo-actions-compact button { font-size: 14px; padding: 10px 12px; min-width: 70px; }
+            .header h1 { font-size: 22px; }
+            .tab { font-size: 14px; padding: 10px; }
+            .submit-btn { font-size: 16px; padding: 14px; }
+            .search-result-item { padding: 10px 12px; }
+            .member-card-header .member-title { font-size: 15px; }
+            .member-card-header .member-badge { font-size: 11px; padding: 3px 10px; }
+            label { font-size: 14px; }
+            .sync-status { font-size: 11px; gap: 8px; flex-wrap: wrap; }
+            .modal { max-width: 95%; padding: 18px; }
+            .modal-header h3 { font-size: 18px; }
         }
-
         @media (min-width: 481px) and (max-width: 768px) {
-            .form-row {
-                grid-template-columns: 1fr 1fr;
-            }
+            .form-row { grid-template-columns: 1fr 1fr; }
         }
-
-        ::-webkit-scrollbar {
-            width: 6px;
-        }
-        ::-webkit-scrollbar-track {
-            background: rgba(255, 255, 255, 0.02);
-            border-radius: 10px;
-        }
-        ::-webkit-scrollbar-thumb {
-            background: rgba(255, 255, 255, 0.1);
-            border-radius: 10px;
-        }
-        ::-webkit-scrollbar-thumb:hover {
-            background: rgba(255, 255, 255, 0.2);
-        }
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: rgba(255, 255, 255, 0.02); border-radius: 10px; }
+        ::-webkit-scrollbar-thumb { background: rgba(255, 255, 255, 0.1); border-radius: 10px; }
+        ::-webkit-scrollbar-thumb:hover { background: rgba(255, 255, 255, 0.2); }
     </style>
 </head>
 <body>
@@ -1113,7 +1064,7 @@
     <div id="authSection">
         <div class="header">
             <h1>🏛️ 🌾 অন্নপূর্ণা যোজনা</h1>
-            <p>Bhagabanppur Gram Panchayat</p>
+            <p>Bhagabanpur Gram Panchayat</p>
             <span style="color:yellow">Arbara-Chanchal-Malda</span>
         </div>
         <div class="tabs">
@@ -1230,7 +1181,7 @@
                 <h3 style="color:#ffffff;font-size:18px;" id="memberAppTitle">Application: ---</h3>
                 <p style="color:#a0aec0;font-size:14px;" id="memberHofInfo">Head: --- | Mobile: ---</p>
                 <div id="duplicateWarning" class="duplicate-warning-box hidden">
-                    ⚠️ This application already has <span class="count" id="duplicateCount">0</span> member(s) uploaded. 
+                    ⚠️ This application already has <span class="count" id="duplicateCount">0</span> member(s) uploaded.
                     Saving will update existing records.
                 </div>
                 <div id="cacheInfo" style="font-size:12px;color:#63b3ed;display:none;">📦 Data loaded from cache</div>
@@ -1282,7 +1233,7 @@
     </div>
 </div>
 
-<!-- Cropper Modal (kept but hidden, no cropping) -->
+<!-- Cropper Modal (hidden, kept for compatibility) -->
 <div class="modal-overlay" id="cropperModal" style="display:none !important;">
     <div class="modal" style="max-width:480px;">
         <div class="modal-header">
@@ -1342,7 +1293,6 @@
             APP.sessionToken = savedToken;
             APP.currentUser = JSON.parse(savedUser);
             showDashboard();
-            // Auto sync after dashboard loads
             setTimeout(() => syncAllData(), 1000);
         }
         window.addEventListener('online', function() {
@@ -1364,11 +1314,10 @@
     });
 
     // ============================================================
-    // SYNC ALL DATA
+    // SYNC
     // ============================================================
     async function syncAllData() {
         if (!APP.isOnline || !APP.sessionToken) {
-            // Try to load from localStorage
             try {
                 const syncedDataSource = localStorage.getItem('syncedDataSource');
                 const syncedUploadedData = localStorage.getItem('syncedUploadedData');
@@ -1376,36 +1325,26 @@
                 if (syncedDataSource && syncedUploadedData) {
                     APP.syncedData.dataSource = JSON.parse(syncedDataSource);
                     APP.syncedData.uploadedData = JSON.parse(syncedUploadedData);
-                    if (lastSync) {
-                        APP.lastSyncTime = parseInt(lastSync);
-                    }
+                    if (lastSync) APP.lastSyncTime = parseInt(lastSync);
                     updateSyncStatus();
                     return true;
                 }
             } catch(e) {}
             return false;
         }
-        
         try {
-            const formData = new URLSearchParams({
-                action: 'sync_data',
-                sessionToken: APP.sessionToken
-            });
+            const formData = new URLSearchParams({ action: 'sync_data', sessionToken: APP.sessionToken });
             const response = await fetch(SCRIPT_URL, { method: 'POST', headers: { 'Content-Type': 'application/x-www-form-urlencoded' }, body: formData });
             const result = await response.json();
-            
             if (result.success) {
                 APP.syncedData.dataSource = result.data.dataSource || [];
                 APP.syncedData.uploadedData = result.data.uploadedData || [];
                 APP.lastSyncTime = Date.now();
-                
-                // Store in localStorage for offline access
                 try {
                     localStorage.setItem('syncedDataSource', JSON.stringify(APP.syncedData.dataSource));
                     localStorage.setItem('syncedUploadedData', JSON.stringify(APP.syncedData.uploadedData));
                     localStorage.setItem('lastSyncTime', APP.lastSyncTime.toString());
                 } catch(e) {}
-                
                 updateSyncStatus();
                 return true;
             } else {
@@ -1418,16 +1357,12 @@
         }
     }
 
-    // ============================================================
-    // SYNC STATUS
-    // ============================================================
     function updateSyncStatus() {
         const indicator = document.getElementById('syncIndicator');
         const timeEl = document.getElementById('syncTime');
         const offlineBadge = document.getElementById('offlineBadge');
         const cacheIndicator = document.getElementById('cacheIndicator');
         const syncUserBadge = document.getElementById('syncUserBadge');
-        
         if (!APP.isOnline) {
             indicator.textContent = '📡 Offline';
             indicator.style.color = '#f6ad55';
@@ -1441,16 +1376,9 @@
                 timeEl.textContent = time.toLocaleTimeString();
             }
         }
-        
-        if (APP.isFromCache) {
-            cacheIndicator.classList.remove('hidden');
-        } else {
-            cacheIndicator.classList.add('hidden');
-        }
-        
-        if (APP.currentUser) {
-            syncUserBadge.textContent = '👤 ' + APP.currentUser.name;
-        }
+        if (APP.isFromCache) cacheIndicator.classList.remove('hidden');
+        else cacheIndicator.classList.add('hidden');
+        if (APP.currentUser) syncUserBadge.textContent = '👤 ' + APP.currentUser.name;
     }
 
     // ============================================================
@@ -1562,17 +1490,13 @@
             APP.sessionToken = userData.sessionToken;
             localStorage.setItem('sessionToken', APP.sessionToken);
             localStorage.setItem('currentUser', JSON.stringify(APP.currentUser));
-            
             showDashboard();
             showMessage('✅ Welcome, ' + userData.name + '!', 'success');
-            
-            // Auto sync data after login
             await syncAllData();
             if (APP.syncedData.dataSource.length > 0) {
                 showMessage('✅ Data synced! ' + APP.syncedData.dataSource.length + ' records loaded.', 'success');
                 setTimeout(() => hideMessage(), 3000);
             }
-            
         } catch (error) {
             showMessage('❌ Login failed: ' + error.message, 'error');
         }
@@ -1630,19 +1554,14 @@
             showMessage('❌ Enter a search term.', 'error');
             return;
         }
-        
         const resultsDiv = document.getElementById('searchResults');
         resultsDiv.innerHTML = '<div style="text-align:center;padding:20px;color:#a0aec0;"><span class="loading"></span> Searching...</div>';
-        
-        // Try synced data first (faster)
         const syncedResults = searchSyncedData(searchTerm);
         if (syncedResults.length > 0) {
             displaySearchResults(syncedResults, true);
             return;
         }
-        
         if (!APP.isOnline) {
-            // Try local cache
             const cached = localStorage.getItem('searchCache_' + searchTerm.toUpperCase());
             if (cached) {
                 try {
@@ -1654,7 +1573,6 @@
             resultsDiv.innerHTML = `<div class="no-results"><span class="icon">🔍</span>No results found offline. Connect to search.</div>`;
             return;
         }
-        
         try {
             const formData = new URLSearchParams({ action: 'search_data', searchTerm, sessionToken: APP.sessionToken });
             const response = await fetch(SCRIPT_URL, { method: 'POST', headers: { 'Content-Type': 'application/x-www-form-urlencoded' }, body: formData });
@@ -1663,7 +1581,6 @@
                 resultsDiv.innerHTML = `<div class="no-results"><span class="icon">🔍</span>${result.message || 'No results'}</div>`;
                 return;
             }
-            // Cache search results locally
             try {
                 localStorage.setItem('searchCache_' + searchTerm.toUpperCase(), JSON.stringify(result.data));
             } catch(e) {}
@@ -1676,12 +1593,10 @@
     function searchSyncedData(searchTerm) {
         const term = searchTerm.trim().toUpperCase();
         const results = [];
-        
         for (const item of APP.syncedData.dataSource) {
             const appNo = (item.applicationNo || '').toUpperCase();
             const hofName = (item.headOfFamily || '').toUpperCase();
             const hofMobile = (item.hofMobile || '');
-            
             if (appNo.includes(term) || hofName.includes(term) || hofMobile === term) {
                 results.push(item);
             }
@@ -1713,14 +1628,11 @@
     async function selectApplication(applicationNo) {
         document.getElementById('searchResults').innerHTML = '<div style="text-align:center;padding:20px;color:#a0aec0;"><span class="loading"></span> Loading members...</div>';
         APP.isFromCache = false;
-        
         try {
-            // Check for duplicates first
             if (APP.isOnline) {
                 const dupFormData = new URLSearchParams({ action: 'check_duplicate', applicationNo, sessionToken: APP.sessionToken });
                 const dupResponse = await fetch(SCRIPT_URL, { method: 'POST', headers: { 'Content-Type': 'application/x-www-form-urlencoded' }, body: dupFormData });
                 const dupResult = await dupResponse.json();
-                
                 if (dupResult.success) {
                     APP.duplicateCheck = dupResult.data;
                     if (dupResult.isDuplicate) {
@@ -1732,20 +1644,15 @@
                 }
             }
 
-            // Load family members - try synced data first
             let memberData = null;
             let fromCache = false;
-            
-            // Check synced uploaded data
             const syncedMembers = APP.syncedData.uploadedData.filter(u => u.applicationNo === applicationNo);
             if (syncedMembers.length > 0) {
-                // Build member list from synced data
                 const appInfo = APP.syncedData.dataSource.find(d => d.applicationNo === applicationNo);
                 const totalMembers = appInfo ? appInfo.totalMembers : 1;
                 const headOfFamily = appInfo ? appInfo.headOfFamily : '';
                 const hofMobile = appInfo ? appInfo.hofMobile : '';
                 const members = [];
-                
                 for (let i = 1; i <= totalMembers; i++) {
                     const memberId = `${applicationNo}-${String(i).padStart(3, '0')}`;
                     const existing = syncedMembers.find(m => m.memberId === memberId);
@@ -1772,8 +1679,6 @@
                 };
                 fromCache = true;
             }
-            
-            // If not in synced data or offline, try online
             if (!memberData && APP.isOnline) {
                 const formData = new URLSearchParams({ action: 'get_family_members', applicationNo, sessionToken: APP.sessionToken });
                 const response = await fetch(SCRIPT_URL, { method: 'POST', headers: { 'Content-Type': 'application/x-www-form-urlencoded' }, body: formData });
@@ -1783,8 +1688,6 @@
                     fromCache = result.cached || false;
                 }
             }
-            
-            // If still no data, try localStorage cache
             if (!memberData) {
                 const cached = localStorage.getItem('familyCache_' + applicationNo);
                 if (cached) {
@@ -1794,31 +1697,26 @@
                     } catch(e) {}
                 }
             }
-            
             if (!memberData) {
                 showMessage('❌ Failed to load family members.', 'error');
                 showSearch();
                 return;
             }
-            
             APP.isFromCache = fromCache;
             APP.currentApplication = memberData;
             APP.members = memberData.members || [];
             APP.uploadedMembers = memberData.members ? memberData.members.filter(m => m.isUploaded) : [];
-            
             renderMemberList();
             document.getElementById('searchSection').classList.add('hidden');
             document.getElementById('memberSection').classList.remove('hidden');
             document.getElementById('memberAppTitle').textContent = '📄 Application: ' + memberData.applicationNo;
             document.getElementById('memberHofInfo').textContent = '👤 Head: ' + memberData.headOfFamily + ' | 📱 ' + memberData.hofMobile;
-            
             if (APP.isFromCache) {
                 document.getElementById('cacheInfo').style.display = 'block';
             } else {
                 document.getElementById('cacheInfo').style.display = 'none';
             }
             updateSyncStatus();
-            
         } catch (error) {
             showMessage('❌ Failed: ' + error.message, 'error');
             showSearch();
@@ -1826,13 +1724,13 @@
     }
 
     // ============================================================
-    // RENDER MEMBER LIST
+    // RENDER MEMBER LIST - compact status on label with progress
     // ============================================================
     function renderMemberList() {
         const container = document.getElementById('memberList');
         let html = '';
         const isDuplicate = APP.duplicateCheck && APP.duplicateCheck.exists;
-        
+
         APP.members.forEach((member) => {
             const isHead = member.isHead;
             const isUploaded = member.isUploaded;
@@ -1840,6 +1738,14 @@
             const isHeadReadOnly = isHead ? 'readonly' : '';
             const headValue = member.memberName || '';
             const uploadedBy = member.uploadedBy || '';
+
+            const docFields = [
+                { key: 'aadharFront', label: '🪪 Aadhar Front' },
+                { key: 'aadharBack', label: '🪪 Aadhar Back' },
+                { key: 'voterFront', label: '🗳️ Voter Front' },
+                { key: 'voterBack', label: '🗳️ Voter Back' },
+                { key: 'voterSlip', label: '📄 Voter Slip' }
+            ];
 
             html += `
                 <div class="member-card ${isUploaded ? 'uploaded' : ''} ${isDuplicate ? 'duplicate-app' : ''}" id="memberCard_${memberId}">
@@ -1860,90 +1766,41 @@
                     </div>
 
                     <div class="member-doc-row">
-                        <div class="member-doc-item">
-                            <span class="doc-label">🪪 Aadhar Front</span>
-                            <div class="doc-upload-area ${member.aadharFront ? 'has-doc' : ''}" id="docArea_aadharFront_${memberId}">
-                                ${member.aadharFront ? 
-                                    `<img class="doc-preview" src="${member.aadharFront}" alt="Aadhar Front">
-                                    <button class="remove-doc-btn" onclick="event.stopPropagation();removeDoc('${memberId}','aadharFront')">✕</button>` : 
-                                    `<span class="doc-icon">📷</span>
-                                    <span class="doc-label-text">Tap to upload</span>
-                                    <div class="photo-actions-compact">
-                                        <button class="btn-camera" onclick="event.stopPropagation();openCamera('${memberId}','aadharFront')">📸 Camera</button>
-                                    </div>`
-                                }
-                                <input type="file" class="camera-input" id="docInput_aadharFront_${memberId}" accept="image/*" capture="environment" onchange="handleDocUpload(event,'${memberId}','aadharFront')">
-                            </div>
-                            <input type="hidden" id="doc_aadharFront_${memberId}" value="${member.aadharFront || ''}">
-                        </div>
-                        <div class="member-doc-item">
-                            <span class="doc-label">🪪 Aadhar Back</span>
-                            <div class="doc-upload-area ${member.aadharBack ? 'has-doc' : ''}" id="docArea_aadharBack_${memberId}">
-                                ${member.aadharBack ? 
-                                    `<img class="doc-preview" src="${member.aadharBack}" alt="Aadhar Back">
-                                    <button class="remove-doc-btn" onclick="event.stopPropagation();removeDoc('${memberId}','aadharBack')">✕</button>` : 
-                                    `<span class="doc-icon">📷</span>
-                                    <span class="doc-label-text">Tap to upload</span>
-                                    <div class="photo-actions-compact">
-                                        <button class="btn-camera" onclick="event.stopPropagation();openCamera('${memberId}','aadharBack')">📸 Camera</button>
-                                    </div>`
-                                }
-                                <input type="file" class="camera-input" id="docInput_aadharBack_${memberId}" accept="image/*" capture="environment" onchange="handleDocUpload(event,'${memberId}','aadharBack')">
-                            </div>
-                            <input type="hidden" id="doc_aadharBack_${memberId}" value="${member.aadharBack || ''}">
-                        </div>
+            `;
+
+            docFields.forEach(({ key, label }, index) => {
+                const has = !!member[key];
+                const icon = has ? '✅' : '⚠️';
+                const cls = has ? 'tick' : 'warn';
+                // Only start a new column when index is even
+                if (index % 2 === 0) {
+                    html += `<div class="member-doc-item">`;
+                }
+                html += `
+                    <span class="doc-label" id="label_${key}_${memberId}">
+                        ${label} <span class="${cls}" id="statusIcon_${key}_${memberId}">${icon}</span>
+                    </span>
+                    <div class="doc-upload-area ${has ? 'has-doc' : ''}" id="docArea_${key}_${memberId}">
+                        ${has ? 
+                            `<img class="doc-preview" src="${member[key]}" alt="${key}">
+                            <button class="remove-doc-btn" onclick="event.stopPropagation();removeDoc('${memberId}','${key}')">✕</button>` : 
+                            `<span class="doc-icon">📷</span>
+                            <span class="doc-label-text">Tap to upload</span>
+                            <div class="photo-actions-compact">
+                                <button class="btn-camera" onclick="event.stopPropagation();openCamera('${memberId}','${key}')">📸 Camera</button>
+                            </div>`
+                        }
+                        <input type="file" class="camera-input" id="docInput_${key}_${memberId}" accept="image/*" capture="environment" onchange="handleDocUpload(event,'${memberId}','${key}')">
+                        <div class="upload-progress" id="progress_${key}_${memberId}"><div class="bar" id="bar_${key}_${memberId}"></div></div>
                     </div>
-                    <div class="member-doc-row">
-                        <div class="member-doc-item">
-                            <span class="doc-label">🗳️ Voter Front</span>
-                            <div class="doc-upload-area ${member.voterFront ? 'has-doc' : ''}" id="docArea_voterFront_${memberId}">
-                                ${member.voterFront ? 
-                                    `<img class="doc-preview" src="${member.voterFront}" alt="Voter Front">
-                                    <button class="remove-doc-btn" onclick="event.stopPropagation();removeDoc('${memberId}','voterFront')">✕</button>` : 
-                                    `<span class="doc-icon">📷</span>
-                                    <span class="doc-label-text">Tap to upload</span>
-                                    <div class="photo-actions-compact">
-                                        <button class="btn-camera" onclick="event.stopPropagation();openCamera('${memberId}','voterFront')">📸 Camera</button>
-                                    </div>`
-                                }
-                                <input type="file" class="camera-input" id="docInput_voterFront_${memberId}" accept="image/*" capture="environment" onchange="handleDocUpload(event,'${memberId}','voterFront')">
-                            </div>
-                            <input type="hidden" id="doc_voterFront_${memberId}" value="${member.voterFront || ''}">
-                        </div>
-                        <div class="member-doc-item">
-                            <span class="doc-label">🗳️ Voter Back</span>
-                            <div class="doc-upload-area ${member.voterBack ? 'has-doc' : ''}" id="docArea_voterBack_${memberId}">
-                                ${member.voterBack ? 
-                                    `<img class="doc-preview" src="${member.voterBack}" alt="Voter Back">
-                                    <button class="remove-doc-btn" onclick="event.stopPropagation();removeDoc('${memberId}','voterBack')">✕</button>` : 
-                                    `<span class="doc-icon">📷</span>
-                                    <span class="doc-label-text">Tap to upload</span>
-                                    <div class="photo-actions-compact">
-                                        <button class="btn-camera" onclick="event.stopPropagation();openCamera('${memberId}','voterBack')">📸 Camera</button>
-                                    </div>`
-                                }
-                                <input type="file" class="camera-input" id="docInput_voterBack_${memberId}" accept="image/*" capture="environment" onchange="handleDocUpload(event,'${memberId}','voterBack')">
-                            </div>
-                            <input type="hidden" id="doc_voterBack_${memberId}" value="${member.voterBack || ''}">
-                        </div>
-                    </div>
-                    <div class="member-doc-row">
-                        <div class="member-doc-item" style="grid-column:1/2;">
-                            <span class="doc-label">📄 Voter Slip</span>
-                            <div class="doc-upload-area ${member.voterSlip ? 'has-doc' : ''}" id="docArea_voterSlip_${memberId}">
-                                ${member.voterSlip ? 
-                                    `<img class="doc-preview" src="${member.voterSlip}" alt="Voter Slip">
-                                    <button class="remove-doc-btn" onclick="event.stopPropagation();removeDoc('${memberId}','voterSlip')">✕</button>` : 
-                                    `<span class="doc-icon">📷</span>
-                                    <span class="doc-label-text">Tap to upload</span>
-                                    <div class="photo-actions-compact">
-                                        <button class="btn-camera" onclick="event.stopPropagation();openCamera('${memberId}','voterSlip')">📸 Camera</button>
-                                    </div>`
-                                }
-                                <input type="file" class="camera-input" id="docInput_voterSlip_${memberId}" accept="image/*" capture="environment" onchange="handleDocUpload(event,'${memberId}','voterSlip')">
-                            </div>
-                            <input type="hidden" id="doc_voterSlip_${memberId}" value="${member.voterSlip || ''}">
-                        </div>
+                    <input type="hidden" id="doc_${key}_${memberId}" value="${member[key] || ''}">
+                `;
+                if (index % 2 === 1 || index === docFields.length - 1) {
+                    html += `</div>`;
+                }
+            });
+
+            html += `
                     </div>
                 </div>
             `;
@@ -1953,7 +1810,7 @@
     }
 
     // ============================================================
-    // CAMERA UPLOAD (no crop, original size)
+    // CAMERA UPLOAD with progress bar that goes to 100% then ✅ appears
     // ============================================================
     function openCamera(memberId, field) {
         const input = document.getElementById(`docInput_${field}_${memberId}`);
@@ -1978,11 +1835,41 @@
         currentDocMemberId = memberId;
         currentDocField = field;
         currentDocData = file;
-        
+
+        // Show progress bar and start animation
+        const progressDiv = document.getElementById(`progress_${field}_${memberId}`);
+        const bar = document.getElementById(`bar_${field}_${memberId}`);
+        if (progressDiv) progressDiv.style.display = 'block';
+        if (bar) bar.style.width = '0%';
+
+        // Animate progress from 0 to 100% smoothly while reading
         const reader = new FileReader();
+        let progressInterval = setInterval(() => {
+            if (bar) {
+                let currentWidth = parseFloat(bar.style.width) || 0;
+                if (currentWidth < 90) {
+                    bar.style.width = (currentWidth + 2) + '%';
+                }
+            }
+        }, 50);
+
         reader.onload = function(e) {
+            // Complete the progress bar to 100%
+            if (bar) bar.style.width = '100%';
+            clearInterval(progressInterval);
+
+            // Upload the image
             uploadOriginalImage(e.target.result, memberId, field);
+            event.target.value = '';
         };
+
+        reader.onerror = function() {
+            clearInterval(progressInterval);
+            if (progressDiv) progressDiv.style.display = 'none';
+            if (bar) bar.style.width = '0%';
+            showMessage('❌ Failed to read file.', 'error');
+        };
+
         reader.readAsDataURL(file);
         event.target.value = '';
     }
@@ -2002,6 +1889,13 @@
             });
             const response = await fetch(SCRIPT_URL, { method: 'POST', headers: { 'Content-Type': 'application/x-www-form-urlencoded' }, body: formData });
             const result = await response.json();
+
+            // Hide progress bar
+            const progressDiv = document.getElementById(`progress_${field}_${memberId}`);
+            const bar = document.getElementById(`bar_${field}_${memberId}`);
+            if (progressDiv) progressDiv.style.display = 'none';
+            if (bar) bar.style.width = '0%';
+
             if (result.success) {
                 document.getElementById(`doc_${field}_${memberId}`).value = result.fileUrl;
                 const area = document.getElementById(`docArea_${field}_${memberId}`);
@@ -2010,18 +1904,51 @@
                     <img class="doc-preview" src="${result.fileUrl}" alt="${field}">
                     <button class="remove-doc-btn" onclick="event.stopPropagation();removeDoc('${memberId}','${field}')">✕</button>
                     <input type="file" class="camera-input" id="docInput_${field}_${memberId}" accept="image/*" capture="environment" onchange="handleDocUpload(event,'${memberId}','${field}')">
+                    <div class="upload-progress" id="progress_${field}_${memberId}"><div class="bar" id="bar_${field}_${memberId}"></div></div>
                 `;
                 const member = APP.members.find(m => m.memberId === memberId);
                 if (member) { member[field] = result.fileUrl; member.isUploaded = true; member.uploadedBy = APP.currentUser.name; }
+
+                // Update status icon to ✅
+                const iconSpan = document.getElementById(`statusIcon_${field}_${memberId}`);
+                if (iconSpan) {
+                    iconSpan.textContent = '✅';
+                    iconSpan.className = 'tick';
+                }
+                // Update label class
+                const label = document.getElementById(`label_${field}_${memberId}`);
+                if (label) {
+                    const clsSpan = label.querySelector('span');
+                    if (clsSpan) {
+                        clsSpan.className = 'tick';
+                        clsSpan.textContent = '✅';
+                    }
+                }
+
                 showMessage('✅ Document uploaded!', 'success');
                 setTimeout(() => hideMessage(), 2000);
                 const card = document.getElementById(`memberCard_${memberId}`);
                 if (card) card.classList.add('uploaded');
             } else {
                 showMessage('❌ Upload failed: ' + (result.error || result.message), 'error');
+                // Revert icon to ⚠️
+                const iconSpan = document.getElementById(`statusIcon_${field}_${memberId}`);
+                if (iconSpan) {
+                    iconSpan.textContent = '⚠️';
+                    iconSpan.className = 'warn';
+                }
             }
         } catch (error) {
             showMessage('❌ Upload failed: ' + error.message, 'error');
+            const iconSpan = document.getElementById(`statusIcon_${field}_${memberId}`);
+            if (iconSpan) {
+                iconSpan.textContent = '⚠️';
+                iconSpan.className = 'warn';
+            }
+            const progressDiv = document.getElementById(`progress_${field}_${memberId}`);
+            const bar = document.getElementById(`bar_${field}_${memberId}`);
+            if (progressDiv) progressDiv.style.display = 'none';
+            if (bar) bar.style.width = '0%';
         }
     }
 
@@ -2036,7 +1963,16 @@
                 <button class="btn-camera" onclick="event.stopPropagation();openCamera('${memberId}','${field}')">📸 Camera</button>
             </div>
             <input type="file" class="camera-input" id="docInput_${field}_${memberId}" accept="image/*" capture="environment" onchange="handleDocUpload(event,'${memberId}','${field}')">
+            <div class="upload-progress" id="progress_${field}_${memberId}"><div class="bar" id="bar_${field}_${memberId}"></div></div>
         `;
+
+        // Update status icon to ⚠️
+        const iconSpan = document.getElementById(`statusIcon_${field}_${memberId}`);
+        if (iconSpan) {
+            iconSpan.textContent = '⚠️';
+            iconSpan.className = 'warn';
+        }
+
         const member = APP.members.find(m => m.memberId === memberId);
         if (member) {
             member[field] = '';
@@ -2048,7 +1984,7 @@
     }
 
     // ============================================================
-    // SAVE ALL MEMBERS with User Tracking & Auto Return to Search
+    // SAVE ALL MEMBERS
     // ============================================================
     async function saveAllMembers() {
         const btn = document.getElementById('saveAllBtn');
@@ -2056,7 +1992,7 @@
         showLoading('saveAllBtn', 'saveAllBtnText', 'Saving...');
         const membersData = [];
         let hasError = false;
-        
+
         APP.members.forEach(member => {
             const memberId = member.memberId;
             const name = document.getElementById(`memberName_${memberId}`).value.trim();
@@ -2129,8 +2065,7 @@
                 }
                 msg += `\n👤 Uploaded by: ${APP.currentUser.name}`;
                 showMessage(msg, 'success');
-                
-                // Reset form after save
+
                 APP.members.forEach(m => {
                     const memberId = m.memberId;
                     if (!m.isHead) {
@@ -2148,7 +2083,14 @@
                                     <button class="btn-camera" onclick="event.stopPropagation();openCamera('${memberId}','${field}')">📸 Camera</button>
                                 </div>
                                 <input type="file" class="camera-input" id="docInput_${field}_${memberId}" accept="image/*" capture="environment" onchange="handleDocUpload(event,'${memberId}','${field}')">
+                                <div class="upload-progress" id="progress_${field}_${memberId}"><div class="bar" id="bar_${field}_${memberId}"></div></div>
                             `;
+                        }
+                        // Reset status icon to ⚠️
+                        const iconSpan = document.getElementById(`statusIcon_${field}_${memberId}`);
+                        if (iconSpan) {
+                            iconSpan.textContent = '⚠️';
+                            iconSpan.className = 'warn';
                         }
                         m[field] = '';
                     });
@@ -2161,23 +2103,16 @@
                 APP.duplicateCheck = null;
                 document.getElementById('duplicateWarning').classList.add('hidden');
                 localStorage.removeItem('pendingMembers');
-                
-                // Clear search caches
                 const searchKeys = Object.keys(localStorage).filter(k => k.startsWith('searchCache_'));
                 searchKeys.forEach(k => localStorage.removeItem(k));
                 APP.isFromCache = false;
                 updateSyncStatus();
-                
-                // Auto sync after save
                 await syncAllData();
-                
-                // Navigate back to search module
                 setTimeout(() => {
                     backToSearch();
                     showMessage('🔄 Ready for next entry. Search for another application.', 'info');
                     setTimeout(() => hideMessage(), 3000);
                 }, 1500);
-                
             } else {
                 showMessage('❌ ' + (result.message || 'Save failed'), 'error');
             }
@@ -2204,8 +2139,8 @@
         const pending = JSON.parse(localStorage.getItem('pendingMembers') || '[]');
         if (pending.length === 0) { showMessage('📊 No pending uploads.', 'info'); return; }
         let msg = '📊 Pending Uploads: ' + pending.length + '\n\n';
-        pending.forEach((m, i) => { 
-            msg += `${i+1}. ${m.memberName} (${m.memberId})\n   📄 ${m.applicationNo}\n   👤 ${m._user || 'Unknown'}\n`; 
+        pending.forEach((m, i) => {
+            msg += `${i+1}. ${m.memberName} (${m.memberId})\n   📄 ${m.applicationNo}\n   👤 ${m._user || 'Unknown'}\n`;
         });
         msg += '\n💡 Sync when online and save.';
         showMessage(msg, 'info');
@@ -2218,6 +2153,8 @@
             '📌 Click result to view family members\n' +
             '📌 Head of Family is read-only\n' +
             '📌 Tap Camera to capture photo (original size, no crop)\n' +
+            '📌 Each doc shows ✅ or ⚠️ right next to the label (compact)\n' +
+            '📌 Progress bar advances to 100% and ✅ appears automatically\n' +
             '📌 Enter member names, Save All\n' +
             '📌 After save: "Your Data forwarded to GP" + form resets\n' +
             '📌 Works offline, syncs when online\n' +
@@ -2268,15 +2205,12 @@
             const formData = new URLSearchParams({ action: 'change_password', contact: APP.currentUser.contact, oldPassword: currentPassword, newPassword });
             const response = await fetch(SCRIPT_URL, { method: 'POST', headers: { 'Content-Type': 'application/x-www-form-urlencoded' }, body: formData });
             const result = await response.json();
-            if (result.success) { showMessage('✅ Password changed!', 'success'); closePasswordModal(); } 
+            if (result.success) { showMessage('✅ Password changed!', 'success'); closePasswordModal(); }
             else { showMessage('❌ ' + result.message, 'error'); }
         } catch (error) { showMessage('❌ Failed: ' + error.message, 'error'); }
         hideLoading('changePwdBtn','changePwdBtnText','Update Password');
     }
 
-    // ============================================================
-    // SYNC PENDING DATA
-    // ============================================================
     async function syncPendingData() {
         if (!APP.isOnline || !APP.sessionToken) return;
         const pending = JSON.parse(localStorage.getItem('pendingMembers') || '[]');
@@ -2299,9 +2233,7 @@
         } catch (e) { console.log('Sync pending error:', e); }
     }
 
-    // ============================================================
     // MODAL HANDLERS
-    // ============================================================
     document.getElementById('passwordModal').addEventListener('click', function(e) { if (e.target === this) closePasswordModal(); });
     document.addEventListener('keydown', function(e) {
         if (e.key === 'Escape') {
@@ -2310,7 +2242,6 @@
         if (e.key === 'Enter' && !document.getElementById('searchSection').classList.contains('hidden')) performSearch();
     });
 
-    // periodic sync (every 2 minutes)
     setInterval(() => {
         if (APP.isOnline && APP.sessionToken) {
             syncPendingData();
