@@ -270,6 +270,7 @@
             justify-content: center;
             align-items: center;
             gap: 14px;
+            flex-wrap: wrap;
         }
 
         .sync-status .online {
@@ -283,6 +284,15 @@
         .sync-status .syncing {
             color: #63b3ed;
             animation: pulse 1s ease-in-out infinite;
+        }
+
+        .cache-badge {
+            font-size: 10px;
+            padding: 2px 10px;
+            border-radius: 8px;
+            background: rgba(99, 179, 237, 0.15);
+            color: #63b3ed;
+            border: 1px solid rgba(99, 179, 237, 0.2);
         }
 
         @keyframes pulse {
@@ -402,6 +412,11 @@
             cursor: default;
         }
 
+        input.duplicate-warning {
+            border-color: rgba(237, 137, 54, 0.4);
+            background: rgba(237, 137, 54, 0.08);
+        }
+
         .password-toggle {
             position: relative;
         }
@@ -483,6 +498,11 @@
 
         .submit-btn.secondary:hover {
             box-shadow: 0 6px 30px rgba(72, 187, 120, 0.35);
+        }
+
+        .submit-btn.warning {
+            background: linear-gradient(135deg, #ed8936 0%, #dd6b20 100%);
+            box-shadow: 0 4px 25px rgba(237, 137, 54, 0.25);
         }
 
         .btn-cancel {
@@ -710,6 +730,12 @@
             margin-top: 2px;
         }
 
+        .search-result-item .result-cached {
+            font-size: 10px;
+            color: #63b3ed;
+            margin-top: 2px;
+        }
+
         .no-results {
             text-align: center;
             padding: 30px 20px;
@@ -736,6 +762,11 @@
         .member-card.uploaded {
             border-color: rgba(72, 187, 120, 0.2);
             background: rgba(72, 187, 120, 0.05);
+        }
+
+        .member-card.duplicate-app {
+            border-color: rgba(237, 137, 54, 0.3);
+            background: rgba(237, 137, 54, 0.05);
         }
 
         .member-card-header {
@@ -775,6 +806,12 @@
             background: rgba(72, 187, 120, 0.2);
             color: #68d391;
             border: 1px solid rgba(72, 187, 120, 0.2);
+        }
+
+        .member-card-header .member-badge.duplicate {
+            background: rgba(237, 137, 54, 0.2);
+            color: #f6ad55;
+            border: 1px solid rgba(237, 137, 54, 0.2);
         }
 
         .member-id-display {
@@ -949,6 +986,28 @@
 
         .back-to-search-btn:active {
             transform: scale(0.95);
+        }
+
+        .duplicate-warning-box {
+            background: rgba(237, 137, 54, 0.1);
+            border: 1px solid rgba(237, 137, 54, 0.2);
+            border-radius: 10px;
+            padding: 12px 14px;
+            margin-bottom: 12px;
+            color: #f6ad55;
+            font-size: 14px;
+            font-weight: 600;
+        }
+
+        .duplicate-warning-box .count {
+            color: #fc8181;
+            font-weight: 800;
+        }
+
+        .uploaded-by-info {
+            font-size: 12px;
+            color: #63b3ed;
+            margin-top: 4px;
         }
 
         /* responsive */
@@ -1127,7 +1186,9 @@
             <div class="sync-status">
                 <span id="syncIndicator">🔄 Syncing...</span>
                 <span id="syncTime"></span>
+                <span id="cacheIndicator" class="cache-badge hidden">📦 Cached</span>
                 <span id="offlineBadge" class="hidden" style="color:#f6ad55;font-weight:700;">📡 OFFLINE</span>
+                <span id="syncUserBadge" style="color:#68d391;font-weight:600;font-size:11px;"></span>
             </div>
         </div>
         <div class="quick-actions-compact">
@@ -1168,6 +1229,11 @@
             <div id="memberHeader" style="margin-bottom:12px;">
                 <h3 style="color:#ffffff;font-size:18px;" id="memberAppTitle">Application: ---</h3>
                 <p style="color:#a0aec0;font-size:14px;" id="memberHofInfo">Head: --- | Mobile: ---</p>
+                <div id="duplicateWarning" class="duplicate-warning-box hidden">
+                    ⚠️ This application already has <span class="count" id="duplicateCount">0</span> member(s) uploaded. 
+                    Saving will update existing records.
+                </div>
+                <div id="cacheInfo" style="font-size:12px;color:#63b3ed;display:none;">📦 Data loaded from cache</div>
             </div>
             <div id="memberList"></div>
             <button class="save-all-btn" id="saveAllBtn" onclick="saveAllMembers()">
@@ -1248,7 +1314,7 @@
     // ============================================================
     // CONFIG
     // ============================================================
-    const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbyYPKEOY6JHryc1l7R9iQoE6kBmLV7uk6doVLr5ENJEipJDeBIws09eM8mBHrequWhS/exec';
+    const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwTJtoktiXNT-AvUeM52ysrUGxPmTniKD3sSEfqoK3eThxtdySBVBDfh97dVxdW-Wk/exec';
 
     const APP = {
         currentUser: null,
@@ -1260,7 +1326,10 @@
         members: [],
         uploadedMembers: [],
         cropperData: null,
-        currentDocUpload: null
+        currentDocUpload: null,
+        duplicateCheck: null,
+        isFromCache: false,
+        syncedData: { dataSource: [], uploadedData: [] }
     };
 
     // ============================================================
@@ -1273,11 +1342,14 @@
             APP.sessionToken = savedToken;
             APP.currentUser = JSON.parse(savedUser);
             showDashboard();
+            // Auto sync after dashboard loads
+            setTimeout(() => syncAllData(), 1000);
         }
         window.addEventListener('online', function() {
             APP.isOnline = true;
             updateSyncStatus();
             syncPendingData();
+            syncAllData();
         });
         window.addEventListener('offline', function() {
             APP.isOnline = false;
@@ -1289,8 +1361,62 @@
         document.getElementById('signinMobile').addEventListener('input', function(e) {
             this.value = this.value.replace(/\D/g, '').slice(0, 10);
         });
-        // No cropper init needed
     });
+
+    // ============================================================
+    // SYNC ALL DATA
+    // ============================================================
+    async function syncAllData() {
+        if (!APP.isOnline || !APP.sessionToken) {
+            // Try to load from localStorage
+            try {
+                const syncedDataSource = localStorage.getItem('syncedDataSource');
+                const syncedUploadedData = localStorage.getItem('syncedUploadedData');
+                const lastSync = localStorage.getItem('lastSyncTime');
+                if (syncedDataSource && syncedUploadedData) {
+                    APP.syncedData.dataSource = JSON.parse(syncedDataSource);
+                    APP.syncedData.uploadedData = JSON.parse(syncedUploadedData);
+                    if (lastSync) {
+                        APP.lastSyncTime = parseInt(lastSync);
+                    }
+                    updateSyncStatus();
+                    return true;
+                }
+            } catch(e) {}
+            return false;
+        }
+        
+        try {
+            const formData = new URLSearchParams({
+                action: 'sync_data',
+                sessionToken: APP.sessionToken
+            });
+            const response = await fetch(SCRIPT_URL, { method: 'POST', headers: { 'Content-Type': 'application/x-www-form-urlencoded' }, body: formData });
+            const result = await response.json();
+            
+            if (result.success) {
+                APP.syncedData.dataSource = result.data.dataSource || [];
+                APP.syncedData.uploadedData = result.data.uploadedData || [];
+                APP.lastSyncTime = Date.now();
+                
+                // Store in localStorage for offline access
+                try {
+                    localStorage.setItem('syncedDataSource', JSON.stringify(APP.syncedData.dataSource));
+                    localStorage.setItem('syncedUploadedData', JSON.stringify(APP.syncedData.uploadedData));
+                    localStorage.setItem('lastSyncTime', APP.lastSyncTime.toString());
+                } catch(e) {}
+                
+                updateSyncStatus();
+                return true;
+            } else {
+                console.error('Sync failed:', result.message);
+                return false;
+            }
+        } catch (error) {
+            console.error('Sync error:', error);
+            return false;
+        }
+    }
 
     // ============================================================
     // SYNC STATUS
@@ -1299,6 +1425,9 @@
         const indicator = document.getElementById('syncIndicator');
         const timeEl = document.getElementById('syncTime');
         const offlineBadge = document.getElementById('offlineBadge');
+        const cacheIndicator = document.getElementById('cacheIndicator');
+        const syncUserBadge = document.getElementById('syncUserBadge');
+        
         if (!APP.isOnline) {
             indicator.textContent = '📡 Offline';
             indicator.style.color = '#f6ad55';
@@ -1307,7 +1436,20 @@
             indicator.textContent = '✅ Online';
             indicator.style.color = '#68d391';
             offlineBadge.classList.add('hidden');
-            if (APP.lastSyncTime) timeEl.textContent = new Date(APP.lastSyncTime).toLocaleTimeString();
+            if (APP.lastSyncTime) {
+                const time = new Date(APP.lastSyncTime);
+                timeEl.textContent = time.toLocaleTimeString();
+            }
+        }
+        
+        if (APP.isFromCache) {
+            cacheIndicator.classList.remove('hidden');
+        } else {
+            cacheIndicator.classList.add('hidden');
+        }
+        
+        if (APP.currentUser) {
+            syncUserBadge.textContent = '👤 ' + APP.currentUser.name;
         }
     }
 
@@ -1335,7 +1477,7 @@
         msg.className = `message ${type}`;
         msg.style.display = 'block';
         clearTimeout(msg._timeout);
-        msg._timeout = setTimeout(() => { msg.style.display = 'none'; }, 6000);
+        msg._timeout = setTimeout(() => { msg.style.display = 'none'; }, 8000);
     }
 
     function hideMessage() {
@@ -1420,8 +1562,17 @@
             APP.sessionToken = userData.sessionToken;
             localStorage.setItem('sessionToken', APP.sessionToken);
             localStorage.setItem('currentUser', JSON.stringify(APP.currentUser));
+            
             showDashboard();
             showMessage('✅ Welcome, ' + userData.name + '!', 'success');
+            
+            // Auto sync data after login
+            await syncAllData();
+            if (APP.syncedData.dataSource.length > 0) {
+                showMessage('✅ Data synced! ' + APP.syncedData.dataSource.length + ' records loaded.', 'success');
+                setTimeout(() => hideMessage(), 3000);
+            }
+            
         } catch (error) {
             showMessage('❌ Login failed: ' + error.message, 'error');
         }
@@ -1454,6 +1605,9 @@
         APP.sessionToken = null;
         APP.currentApplication = null;
         APP.members = [];
+        APP.duplicateCheck = null;
+        APP.isFromCache = false;
+        APP.syncedData = { dataSource: [], uploadedData: [] };
         document.getElementById('dashboardSection').classList.add('hidden');
         document.getElementById('authSection').classList.remove('hidden');
         document.getElementById('signinFormElement').reset();
@@ -1476,12 +1630,31 @@
             showMessage('❌ Enter a search term.', 'error');
             return;
         }
-        if (!APP.isOnline) {
-            showMessage('⚠️ Offline. Connect to search.', 'warning');
-            return;
-        }
+        
         const resultsDiv = document.getElementById('searchResults');
         resultsDiv.innerHTML = '<div style="text-align:center;padding:20px;color:#a0aec0;"><span class="loading"></span> Searching...</div>';
+        
+        // Try synced data first (faster)
+        const syncedResults = searchSyncedData(searchTerm);
+        if (syncedResults.length > 0) {
+            displaySearchResults(syncedResults, true);
+            return;
+        }
+        
+        if (!APP.isOnline) {
+            // Try local cache
+            const cached = localStorage.getItem('searchCache_' + searchTerm.toUpperCase());
+            if (cached) {
+                try {
+                    const data = JSON.parse(cached);
+                    displaySearchResults(data, true);
+                    return;
+                } catch(e) {}
+            }
+            resultsDiv.innerHTML = `<div class="no-results"><span class="icon">🔍</span>No results found offline. Connect to search.</div>`;
+            return;
+        }
+        
         try {
             const formData = new URLSearchParams({ action: 'search_data', searchTerm, sessionToken: APP.sessionToken });
             const response = await fetch(SCRIPT_URL, { method: 'POST', headers: { 'Content-Type': 'application/x-www-form-urlencoded' }, body: formData });
@@ -1490,104 +1663,196 @@
                 resultsDiv.innerHTML = `<div class="no-results"><span class="icon">🔍</span>${result.message || 'No results'}</div>`;
                 return;
             }
-            if (result.data && result.data.length > 0) {
-                let html = '';
-                result.data.forEach(item => {
-                    html += `<div class="search-result-item" onclick="selectApplication('${item.applicationNo}')">
-                        <div class="result-app-no">📄 ${item.applicationNo}</div>
-                        <div class="result-hof">👤 ${item.headOfFamily}</div>
-                        <div class="result-mobile">📱 ${item.hofMobile}</div>
-                        <div class="result-members">👪 ${item.totalMembers} member${item.totalMembers > 1 ? 's' : ''} | 📍 ${item.cat || 'N/A'}</div>
-                    </div>`;
-                });
-                resultsDiv.innerHTML = html;
-            } else {
-                resultsDiv.innerHTML = `<div class="no-results"><span class="icon">🔍</span>No matching records</div>`;
-            }
+            // Cache search results locally
+            try {
+                localStorage.setItem('searchCache_' + searchTerm.toUpperCase(), JSON.stringify(result.data));
+            } catch(e) {}
+            displaySearchResults(result.data, result.cached || false);
         } catch (error) {
             resultsDiv.innerHTML = `<div class="no-results"><span class="icon">❌</span>Search failed: ${error.message}</div>`;
         }
     }
 
+    function searchSyncedData(searchTerm) {
+        const term = searchTerm.trim().toUpperCase();
+        const results = [];
+        
+        for (const item of APP.syncedData.dataSource) {
+            const appNo = (item.applicationNo || '').toUpperCase();
+            const hofName = (item.headOfFamily || '').toUpperCase();
+            const hofMobile = (item.hofMobile || '');
+            
+            if (appNo.includes(term) || hofName.includes(term) || hofMobile === term) {
+                results.push(item);
+            }
+        }
+        return results;
+    }
+
+    function displaySearchResults(data, fromCache) {
+        const resultsDiv = document.getElementById('searchResults');
+        if (data && data.length > 0) {
+            let html = fromCache ? '<div style="font-size:12px;color:#63b3ed;margin-bottom:8px;">📦 Results from cached data</div>' : '';
+            data.forEach(item => {
+                html += `<div class="search-result-item" onclick="selectApplication('${item.applicationNo}')">
+                    <div class="result-app-no">📄 ${item.applicationNo}</div>
+                    <div class="result-hof">👤 ${item.headOfFamily}</div>
+                    <div class="result-mobile">📱 ${item.hofMobile}</div>
+                    <div class="result-members">👪 ${item.totalMembers} member${item.totalMembers > 1 ? 's' : ''} | 📍 ${item.cat || 'N/A'}</div>
+                </div>`;
+            });
+            resultsDiv.innerHTML = html;
+        } else {
+            resultsDiv.innerHTML = `<div class="no-results"><span class="icon">🔍</span>No matching records</div>`;
+        }
+    }
+
     // ============================================================
-    // SELECT APPLICATION
+    // SELECT APPLICATION with Duplicate Check
     // ============================================================
     async function selectApplication(applicationNo) {
-        if (!APP.isOnline) {
-            showMessage('⚠️ Offline. Connect to load members.', 'warning');
-            return;
-        }
         document.getElementById('searchResults').innerHTML = '<div style="text-align:center;padding:20px;color:#a0aec0;"><span class="loading"></span> Loading members...</div>';
+        APP.isFromCache = false;
+        
         try {
-            const formData = new URLSearchParams({ action: 'get_family_members', applicationNo, sessionToken: APP.sessionToken });
-            const response = await fetch(SCRIPT_URL, { method: 'POST', headers: { 'Content-Type': 'application/x-www-form-urlencoded' }, body: formData });
-            const result = await response.json();
-            if (!result.success) {
-                showMessage('❌ ' + (result.message || 'Failed to load'), 'error');
+            // Check for duplicates first
+            if (APP.isOnline) {
+                const dupFormData = new URLSearchParams({ action: 'check_duplicate', applicationNo, sessionToken: APP.sessionToken });
+                const dupResponse = await fetch(SCRIPT_URL, { method: 'POST', headers: { 'Content-Type': 'application/x-www-form-urlencoded' }, body: dupFormData });
+                const dupResult = await dupResponse.json();
+                
+                if (dupResult.success) {
+                    APP.duplicateCheck = dupResult.data;
+                    if (dupResult.isDuplicate) {
+                        document.getElementById('duplicateWarning').classList.remove('hidden');
+                        document.getElementById('duplicateCount').textContent = dupResult.data.count;
+                    } else {
+                        document.getElementById('duplicateWarning').classList.add('hidden');
+                    }
+                }
+            }
+
+            // Load family members - try synced data first
+            let memberData = null;
+            let fromCache = false;
+            
+            // Check synced uploaded data
+            const syncedMembers = APP.syncedData.uploadedData.filter(u => u.applicationNo === applicationNo);
+            if (syncedMembers.length > 0) {
+                // Build member list from synced data
+                const appInfo = APP.syncedData.dataSource.find(d => d.applicationNo === applicationNo);
+                const totalMembers = appInfo ? appInfo.totalMembers : 1;
+                const headOfFamily = appInfo ? appInfo.headOfFamily : '';
+                const hofMobile = appInfo ? appInfo.hofMobile : '';
+                const members = [];
+                
+                for (let i = 1; i <= totalMembers; i++) {
+                    const memberId = `${applicationNo}-${String(i).padStart(3, '0')}`;
+                    const existing = syncedMembers.find(m => m.memberId === memberId);
+                    members.push({
+                        memberId: memberId,
+                        memberName: existing ? existing.memberName : (i === 1 ? headOfFamily : `Member ${i}`),
+                        isHead: i === 1,
+                        memberIndex: i,
+                        aadharFront: existing ? existing.aadharFront : '',
+                        aadharBack: existing ? existing.aadharBack : '',
+                        voterFront: existing ? existing.voterFront : '',
+                        voterBack: existing ? existing.voterBack : '',
+                        voterSlip: existing ? existing.voterSlip : '',
+                        isUploaded: !!existing,
+                        uploadedBy: existing ? existing.uploadedBy : ''
+                    });
+                }
+                memberData = {
+                    applicationNo: applicationNo,
+                    headOfFamily: headOfFamily,
+                    hofMobile: hofMobile,
+                    totalMembers: totalMembers,
+                    members: members
+                };
+                fromCache = true;
+            }
+            
+            // If not in synced data or offline, try online
+            if (!memberData && APP.isOnline) {
+                const formData = new URLSearchParams({ action: 'get_family_members', applicationNo, sessionToken: APP.sessionToken });
+                const response = await fetch(SCRIPT_URL, { method: 'POST', headers: { 'Content-Type': 'application/x-www-form-urlencoded' }, body: formData });
+                const result = await response.json();
+                if (result.success) {
+                    memberData = result.data;
+                    fromCache = result.cached || false;
+                }
+            }
+            
+            // If still no data, try localStorage cache
+            if (!memberData) {
+                const cached = localStorage.getItem('familyCache_' + applicationNo);
+                if (cached) {
+                    try {
+                        memberData = JSON.parse(cached);
+                        fromCache = true;
+                    } catch(e) {}
+                }
+            }
+            
+            if (!memberData) {
+                showMessage('❌ Failed to load family members.', 'error');
                 showSearch();
                 return;
             }
-            const data = result.data;
-            APP.currentApplication = data;
-            APP.members = data.members || [];
-            await loadUploadedMembers(applicationNo);
+            
+            APP.isFromCache = fromCache;
+            APP.currentApplication = memberData;
+            APP.members = memberData.members || [];
+            APP.uploadedMembers = memberData.members ? memberData.members.filter(m => m.isUploaded) : [];
+            
             renderMemberList();
             document.getElementById('searchSection').classList.add('hidden');
             document.getElementById('memberSection').classList.remove('hidden');
-            document.getElementById('memberAppTitle').textContent = '📄 Application: ' + data.applicationNo;
-            document.getElementById('memberHofInfo').textContent = '👤 Head: ' + data.headOfFamily + ' | 📱 ' + data.hofMobile;
+            document.getElementById('memberAppTitle').textContent = '📄 Application: ' + memberData.applicationNo;
+            document.getElementById('memberHofInfo').textContent = '👤 Head: ' + memberData.headOfFamily + ' | 📱 ' + memberData.hofMobile;
+            
+            if (APP.isFromCache) {
+                document.getElementById('cacheInfo').style.display = 'block';
+            } else {
+                document.getElementById('cacheInfo').style.display = 'none';
+            }
+            updateSyncStatus();
+            
         } catch (error) {
             showMessage('❌ Failed: ' + error.message, 'error');
             showSearch();
         }
     }
 
-    async function loadUploadedMembers(applicationNo) {
-        try {
-            const formData = new URLSearchParams({ action: 'get_uploaded_members', applicationNo, sessionToken: APP.sessionToken });
-            const response = await fetch(SCRIPT_URL, { method: 'POST', headers: { 'Content-Type': 'application/x-www-form-urlencoded' }, body: formData });
-            const result = await response.json();
-            if (result.success && result.data) {
-                APP.uploadedMembers = result.data;
-                APP.uploadedMembers.forEach(u => {
-                    const member = APP.members.find(m => m.memberId === u.memberId);
-                    if (member) {
-                        member.aadharFront = u.aadharFront || '';
-                        member.aadharBack = u.aadharBack || '';
-                        member.voterFront = u.voterFront || '';
-                        member.voterBack = u.voterBack || '';
-                        member.voterSlip = u.voterSlip || '';
-                        member.isUploaded = true;
-                        member.memberName = u.memberName || member.memberName;
-                    }
-                });
-            }
-        } catch (e) { console.log('Load uploaded error:', e); }
-    }
-
     // ============================================================
-    // RENDER MEMBER LIST (Head read-only, no gallery, no crop)
+    // RENDER MEMBER LIST
     // ============================================================
     function renderMemberList() {
         const container = document.getElementById('memberList');
         let html = '';
+        const isDuplicate = APP.duplicateCheck && APP.duplicateCheck.exists;
+        
         APP.members.forEach((member) => {
             const isHead = member.isHead;
             const isUploaded = member.isUploaded;
             const memberId = member.memberId;
             const isHeadReadOnly = isHead ? 'readonly' : '';
             const headValue = member.memberName || '';
+            const uploadedBy = member.uploadedBy || '';
 
             html += `
-                <div class="member-card ${isUploaded ? 'uploaded' : ''}" id="memberCard_${memberId}">
+                <div class="member-card ${isUploaded ? 'uploaded' : ''} ${isDuplicate ? 'duplicate-app' : ''}" id="memberCard_${memberId}">
                     <div class="member-card-header">
                         <span class="member-title">${isHead ? '👤 Head' : '👤 Member ' + member.memberIndex}</span>
                         <span>
                             <span class="member-badge ${isHead ? 'head' : 'member'}">${isHead ? 'HEAD' : 'MEMBER'}</span>
                             ${isUploaded ? '<span class="member-badge uploaded">✅ Uploaded</span>' : ''}
+                            ${isDuplicate && !isUploaded ? '<span class="member-badge duplicate">⚠️ Duplicate App</span>' : ''}
                         </span>
                     </div>
                     <div class="member-id-display">🆔 ${memberId}</div>
+                    ${uploadedBy ? `<div class="uploaded-by-info">👤 Uploaded by: ${uploadedBy}</div>` : ''}
 
                     <div class="form-group">
                         <label>Member Name <span class="required">*</span></label>
@@ -1710,14 +1975,12 @@
             event.target.value = '';
             return;
         }
-        // No crop: just upload the original image
         currentDocMemberId = memberId;
         currentDocField = field;
         currentDocData = file;
         
         const reader = new FileReader();
         reader.onload = function(e) {
-            // Upload directly without cropping
             uploadOriginalImage(e.target.result, memberId, field);
         };
         reader.readAsDataURL(file);
@@ -1749,7 +2012,7 @@
                     <input type="file" class="camera-input" id="docInput_${field}_${memberId}" accept="image/*" capture="environment" onchange="handleDocUpload(event,'${memberId}','${field}')">
                 `;
                 const member = APP.members.find(m => m.memberId === memberId);
-                if (member) { member[field] = result.fileUrl; member.isUploaded = true; }
+                if (member) { member[field] = result.fileUrl; member.isUploaded = true; member.uploadedBy = APP.currentUser.name; }
                 showMessage('✅ Document uploaded!', 'success');
                 setTimeout(() => hideMessage(), 2000);
                 const card = document.getElementById(`memberCard_${memberId}`);
@@ -1785,7 +2048,7 @@
     }
 
     // ============================================================
-    // SAVE ALL MEMBERS with popup "Your Data forwarded to GP" + reset
+    // SAVE ALL MEMBERS with User Tracking & Auto Return to Search
     // ============================================================
     async function saveAllMembers() {
         const btn = document.getElementById('saveAllBtn');
@@ -1793,6 +2056,7 @@
         showLoading('saveAllBtn', 'saveAllBtnText', 'Saving...');
         const membersData = [];
         let hasError = false;
+        
         APP.members.forEach(member => {
             const memberId = member.memberId;
             const name = document.getElementById(`memberName_${memberId}`).value.trim();
@@ -1838,8 +2102,8 @@
                 const pending = JSON.parse(localStorage.getItem('pendingMembers') || '[]');
                 membersData.forEach(m => {
                     const existing = pending.find(p => p.memberId === m.memberId);
-                    if (!existing) pending.push({ ...m, _timestamp: Date.now() });
-                    else Object.assign(existing, m);
+                    if (!existing) pending.push({ ...m, _timestamp: Date.now(), _user: APP.currentUser.name });
+                    else { Object.assign(existing, m); existing._user = APP.currentUser.name; }
                 });
                 localStorage.setItem('pendingMembers', JSON.stringify(pending));
                 showMessage('💾 Saved offline. Will sync when online.', 'warning');
@@ -1853,20 +2117,25 @@
             const formData = new URLSearchParams({
                 action: 'save_all_members',
                 membersData: JSON.stringify(membersData),
-                sessionToken: APP.sessionToken
+                sessionToken: APP.sessionToken,
+                userName: APP.currentUser.name
             });
             const response = await fetch(SCRIPT_URL, { method: 'POST', headers: { 'Content-Type': 'application/x-www-form-urlencoded' }, body: formData });
             const result = await response.json();
             if (result.success) {
-                // POPUP: "Your Data forwarded to GP"
-                showMessage('✅ Your Data forwarded to GP', 'success');
-                // Reset form: clear all member names except head (read-only), clear all docs, reset uploaded state
+                let msg = '✅ Your Data forwarded to GP';
+                if (result.data && result.data.duplicates > 0) {
+                    msg += `\n⚠️ ${result.data.duplicates} duplicate application(s) found and updated.`;
+                }
+                msg += `\n👤 Uploaded by: ${APP.currentUser.name}`;
+                showMessage(msg, 'success');
+                
+                // Reset form after save
                 APP.members.forEach(m => {
                     const memberId = m.memberId;
                     if (!m.isHead) {
                         document.getElementById(`memberName_${memberId}`).value = '';
                     }
-                    // Clear doc fields
                     ['aadharFront','aadharBack','voterFront','voterBack','voterSlip'].forEach(field => {
                         document.getElementById(`doc_${field}_${memberId}`).value = '';
                         const area = document.getElementById(`docArea_${field}_${memberId}`);
@@ -1884,20 +2153,31 @@
                         m[field] = '';
                     });
                     m.isUploaded = false;
+                    m.uploadedBy = '';
                     const card = document.getElementById(`memberCard_${memberId}`);
                     if (card) card.classList.remove('uploaded');
                 });
                 APP.uploadedMembers = [];
+                APP.duplicateCheck = null;
+                document.getElementById('duplicateWarning').classList.add('hidden');
                 localStorage.removeItem('pendingMembers');
-                // Update badges
-                APP.members.forEach(m => {
-                    const card = document.getElementById(`memberCard_${m.memberId}`);
-                    if (card) {
-                        const badge = card.querySelector('.member-badge.uploaded');
-                        if (badge) badge.remove();
-                    }
-                });
-                setTimeout(() => hideMessage(), 4000);
+                
+                // Clear search caches
+                const searchKeys = Object.keys(localStorage).filter(k => k.startsWith('searchCache_'));
+                searchKeys.forEach(k => localStorage.removeItem(k));
+                APP.isFromCache = false;
+                updateSyncStatus();
+                
+                // Auto sync after save
+                await syncAllData();
+                
+                // Navigate back to search module
+                setTimeout(() => {
+                    backToSearch();
+                    showMessage('🔄 Ready for next entry. Search for another application.', 'info');
+                    setTimeout(() => hideMessage(), 3000);
+                }, 1500);
+                
             } else {
                 showMessage('❌ ' + (result.message || 'Save failed'), 'error');
             }
@@ -1906,8 +2186,8 @@
                 const pending = JSON.parse(localStorage.getItem('pendingMembers') || '[]');
                 membersData.forEach(m => {
                     const existing = pending.find(p => p.memberId === m.memberId);
-                    if (!existing) pending.push({ ...m, _timestamp: Date.now() });
-                    else Object.assign(existing, m);
+                    if (!existing) pending.push({ ...m, _timestamp: Date.now(), _user: APP.currentUser.name });
+                    else { Object.assign(existing, m); existing._user = APP.currentUser.name; }
                 });
                 localStorage.setItem('pendingMembers', JSON.stringify(pending));
                 showMessage('⚠️ Network error. Data saved offline.', 'warning');
@@ -1924,7 +2204,9 @@
         const pending = JSON.parse(localStorage.getItem('pendingMembers') || '[]');
         if (pending.length === 0) { showMessage('📊 No pending uploads.', 'info'); return; }
         let msg = '📊 Pending Uploads: ' + pending.length + '\n\n';
-        pending.forEach((m, i) => { msg += `${i+1}. ${m.memberName} (${m.memberId})\n   📄 ${m.applicationNo}\n`; });
+        pending.forEach((m, i) => { 
+            msg += `${i+1}. ${m.memberName} (${m.memberId})\n   📄 ${m.applicationNo}\n   👤 ${m._user || 'Unknown'}\n`; 
+        });
         msg += '\n💡 Sync when online and save.';
         showMessage(msg, 'info');
     }
@@ -1938,7 +2220,10 @@
             '📌 Tap Camera to capture photo (original size, no crop)\n' +
             '📌 Enter member names, Save All\n' +
             '📌 After save: "Your Data forwarded to GP" + form resets\n' +
-            '📌 Works offline, syncs when online',
+            '📌 Works offline, syncs when online\n' +
+            '📌 Duplicate Application check prevents duplicate entries\n' +
+            '📌 Cached data for faster loading (shown with 📦 badge)\n' +
+            '📌 All uploads tracked with "Uploaded By: [username]"',
             'info'
         );
     }
@@ -1948,7 +2233,11 @@
         document.getElementById('searchSection').classList.remove('hidden');
         APP.currentApplication = null;
         APP.members = [];
+        APP.duplicateCheck = null;
+        APP.isFromCache = false;
+        document.getElementById('duplicateWarning').classList.add('hidden');
         document.getElementById('searchInput').focus();
+        updateSyncStatus();
     }
 
     // ============================================================
@@ -1996,7 +2285,8 @@
             const formData = new URLSearchParams({
                 action: 'save_all_members',
                 membersData: JSON.stringify(pending),
-                sessionToken: APP.sessionToken
+                sessionToken: APP.sessionToken,
+                userName: APP.currentUser ? APP.currentUser.name : 'Unknown'
             });
             const response = await fetch(SCRIPT_URL, { method: 'POST', headers: { 'Content-Type': 'application/x-www-form-urlencoded' }, body: formData });
             const result = await response.json();
@@ -2004,6 +2294,7 @@
                 localStorage.removeItem('pendingMembers');
                 showMessage('✅ Synced ' + pending.length + ' pending records.', 'success');
                 setTimeout(() => hideMessage(), 3000);
+                await syncAllData();
             }
         } catch (e) { console.log('Sync pending error:', e); }
     }
@@ -2019,13 +2310,14 @@
         if (e.key === 'Enter' && !document.getElementById('searchSection').classList.contains('hidden')) performSearch();
     });
 
-    // periodic sync
+    // periodic sync (every 2 minutes)
     setInterval(() => {
         if (APP.isOnline && APP.sessionToken) {
             syncPendingData();
+            syncAllData();
         }
         updateSyncStatus();
-    }, 30000);
+    }, 120000);
 </script>
 </body>
 </html>
