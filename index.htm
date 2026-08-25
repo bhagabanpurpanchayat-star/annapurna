@@ -516,8 +516,15 @@
         }
 
         .submit-btn:disabled {
-            opacity: 0.6;
+            opacity: 0.5;
             transform: scale(1);
+            cursor: not-allowed;
+            box-shadow: none;
+        }
+
+        .submit-btn:disabled:hover {
+            transform: scale(1);
+            box-shadow: 0 4px 25px rgba(102, 126, 234, 0.3);
         }
 
         .submit-btn.secondary {
@@ -978,17 +985,18 @@
             box-shadow: 0 4px 25px rgba(102, 126, 234, 0.3);
         }
 
-        .save-all-btn:hover {
+        .save-all-btn:hover:not(:disabled) {
             transform: translateY(-2px);
             box-shadow: 0 6px 30px rgba(102, 126, 234, 0.4);
         }
 
-        .save-all-btn:active {
+        .save-all-btn:active:not(:disabled) {
             transform: scale(0.98);
         }
 
         .save-all-btn:disabled {
-            opacity: 0.6;
+            opacity: 0.5;
+            cursor: not-allowed;
             transform: scale(1);
         }
 
@@ -1058,6 +1066,38 @@
             font-size: 12px;
             color: rgba(255, 255, 255, 0.4);
             margin-top: 4px;
+        }
+
+        /* Validation status indicator */
+        .validation-status {
+            font-size: 13px;
+            padding: 8px 14px;
+            border-radius: 10px;
+            margin-bottom: 12px;
+            font-weight: 600;
+            text-align: center;
+        }
+
+        .validation-status.ready {
+            background: rgba(72, 187, 120, 0.15);
+            color: #68d391;
+            border: 1px solid rgba(72, 187, 120, 0.2);
+        }
+
+        .validation-status.pending {
+            background: rgba(237, 137, 54, 0.15);
+            color: #f6ad55;
+            border: 1px solid rgba(237, 137, 54, 0.2);
+        }
+
+        .validation-status .doc-count {
+            font-weight: 800;
+            color: #63b3ed;
+        }
+
+        .validation-status .total-count {
+            font-weight: 800;
+            color: #ffffff;
         }
 
         @media (max-width: 480px) {
@@ -1224,9 +1264,12 @@
                     Saving will update existing records.
                 </div>
                 <div id="cacheInfo" style="font-size:12px;color:#63b3ed;display:none;">📦 Data loaded from cache</div>
+                <div id="validationStatus" class="validation-status pending">
+                    ⏳ Waiting for documents...
+                </div>
             </div>
             <div id="memberList"></div>
-            <button class="save-all-btn" id="saveAllBtn" onclick="saveAllMembers()">
+            <button class="save-all-btn" id="saveAllBtn" onclick="saveAllMembers()" disabled>
                 <span id="saveAllBtnText">💾 Save All Members</span>
             </button>
         </div>
@@ -1298,6 +1341,8 @@
         backgroundSyncRunning: false
     };
 
+    const REQUIRED_DOCS = ['aadharFront', 'aadharBack', 'voterFront', 'voterBack', 'voterSlip'];
+
     // ============================================================
     // INIT
     // ============================================================
@@ -1341,6 +1386,58 @@
             this.value = this.value.replace(/\D/g, '').slice(0, 10);
         });
     });
+
+    // ============================================================
+    // DOCUMENT VALIDATION
+    // ============================================================
+    function checkAllDocumentsAttached() {
+        if (!APP.members || APP.members.length === 0) {
+            updateValidationStatus(false, 0, 0);
+            return false;
+        }
+
+        let totalRequired = 0;
+        let attachedCount = 0;
+        let allAttached = true;
+
+        APP.members.forEach(member => {
+            REQUIRED_DOCS.forEach(docKey => {
+                totalRequired++;
+                if (member[docKey] && member[docKey].trim() !== '') {
+                    attachedCount++;
+                } else {
+                    allAttached = false;
+                }
+            });
+        });
+
+        updateValidationStatus(allAttached, attachedCount, totalRequired);
+        return allAttached;
+    }
+
+    function updateValidationStatus(ready, attached, total) {
+        const statusEl = document.getElementById('validationStatus');
+        const saveBtn = document.getElementById('saveAllBtn');
+        
+        if (!statusEl || !saveBtn) return;
+
+        if (ready && attached > 0) {
+            statusEl.className = 'validation-status ready';
+            statusEl.innerHTML = '✅ All documents attached! (<span class="doc-count">' + attached + '</span>/<span class="total-count">' + total + '</span>)';
+            saveBtn.disabled = false;
+            document.getElementById('saveAllBtnText').textContent = '💾 Save All Members';
+        } else if (attached > 0) {
+            statusEl.className = 'validation-status pending';
+            statusEl.innerHTML = '⏳ <span class="doc-count">' + attached + '</span>/<span class="total-count">' + total + '</span> documents attached. Upload all 5 docs per member.';
+            saveBtn.disabled = true;
+            document.getElementById('saveAllBtnText').textContent = '⏳ Upload all documents first';
+        } else {
+            statusEl.className = 'validation-status pending';
+            statusEl.innerHTML = '📷 Upload all 5 documents for each member (Aadhar Front/Back, Voter Front/Back, Voter Slip)';
+            saveBtn.disabled = true;
+            document.getElementById('saveAllBtnText').textContent = '⏳ Upload all documents first';
+        }
+    }
 
     // ============================================================
     // SYNC FUNCTIONS
@@ -1968,6 +2065,9 @@
                 document.getElementById('cacheInfo').style.display = 'none';
             }
             
+            // Check documents after rendering
+            setTimeout(() => checkAllDocumentsAttached(), 500);
+            
             updateSyncStatus();
         } catch (error) {
             showMessage('❌ Failed: ' + error.message, 'error');
@@ -2049,6 +2149,9 @@
         });
         container.innerHTML = html;
         document.getElementById('saveAllBtn').classList.remove('hidden');
+        
+        // Reset validation
+        setTimeout(() => checkAllDocumentsAttached(), 300);
     }
 
     // ============================================================
@@ -2147,6 +2250,9 @@
                 setTimeout(() => hideMessage(), 2000);
                 const card = document.getElementById('memberCard_' + memberId);
                 if (card) card.classList.add('uploaded');
+                
+                // Check all documents after upload
+                checkAllDocumentsAttached();
             } else {
                 showMessage('❌ Upload failed: ' + (result.error || result.message), 'error');
                 const iconSpan = document.getElementById('statusIcon_' + field + '_' + memberId);
@@ -2195,6 +2301,9 @@
         }
         showMessage('🗑️ Document removed', 'info');
         setTimeout(() => hideMessage(), 1500);
+        
+        // Re-check documents after removal
+        checkAllDocumentsAttached();
     }
 
     // ============================================================
@@ -2203,6 +2312,13 @@
     async function saveAllMembers() {
         const btn = document.getElementById('saveAllBtn');
         const btnText = document.getElementById('saveAllBtnText');
+        
+        // Double-check before saving
+        if (!checkAllDocumentsAttached()) {
+            showMessage('❌ Please attach all 5 documents for each member before saving.', 'error');
+            return;
+        }
+        
         showLoading('saveAllBtn', 'saveAllBtnText', 'Saving...');
         const membersData = [];
         let hasError = false;
@@ -2319,6 +2435,10 @@
                 APP.isFromCache = false;
                 updateSyncStatus();
                 await syncFullData();
+                
+                // Re-check documents after reset (should show pending)
+                checkAllDocumentsAttached();
+                
                 setTimeout(() => {
                     backToSearch();
                     showMessage('🔄 Ready for next entry. Search for another application.', 'info');
